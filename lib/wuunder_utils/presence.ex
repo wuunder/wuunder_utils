@@ -5,7 +5,14 @@ defmodule WuunderUtils.Presence do
   alias WuunderUtils.String
   alias WuunderUtils.Map
 
-  @type t() :: map() | Elixir.String.t() | Ecto.Association.NotLoaded.t() | nil
+  @type t() ::
+          integer()
+          | float()
+          | Decimal.t()
+          | map()
+          | Elixir.String.t()
+          | Ecto.Association.NotLoaded.t()
+          | nil
 
   @doc """
   Checks if value is present
@@ -29,8 +36,10 @@ defmodule WuunderUtils.Presence do
 
   """
   @spec present?(t()) :: boolean()
+  def present?(%Decimal{}), do: true
   def present?(map) when is_map(map), do: Map.present?(map)
   def present?(value) when is_binary(value) or is_nil(value), do: String.present?(value)
+  def present?(value) when is_number(value), do: true
 
   @doc """
   The inverse of present?

@@ -2,6 +2,7 @@ defmodule WuunderUtils.Map do
   @moduledoc """
   Contains a set of helpers to deal with some complex stuff with Maps and Structs
   """
+  alias WuunderUtils.Number
   alias WuunderUtils.Presence
 
   import WuunderUtils.Map.Guards,
@@ -56,6 +57,34 @@ defmodule WuunderUtils.Map do
     else
       default
     end
+  end
+
+  @doc """
+  Lazy helper that grabs the field of a map and tries to convert it to a decimal in one pass
+
+  ## Examples
+
+      iex> WuunderUtils.Map.get_field_as_decimal(%{value: "50"}, :value)
+      Decimal.new("50")
+
+      iex> WuunderUtils.Map.get_field_as_decimal(%{value: Decimal.new("1337.5")}, :value)
+      Decimal.new("1337.5")
+
+      iex> WuunderUtils.Map.get_field_as_decimal(%{value: 50}, :value)
+      Decimal.new("50")
+
+      iex> WuunderUtils.Map.get_field_as_decimal(%{value: 50}, :weight)
+      Decimal.new("0")
+
+      iex> WuunderUtils.Map.get_field_as_decimal(%{value: nil}, :value)
+      Decimal.new("0")
+
+  """
+  @spec get_field_as_decimal(map(), map_key()) :: Decimal.t()
+  def get_field_as_decimal(map, key) when is_map(map) and is_valid_map_key(key) do
+    map
+    |> get_field(key)
+    |> Number.to_decimal()
   end
 
   @doc """
