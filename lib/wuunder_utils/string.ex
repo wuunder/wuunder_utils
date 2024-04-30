@@ -3,6 +3,8 @@ defmodule WuunderUtils.String do
   Contains a set of String helpers
   """
 
+  defguard is_empty(string) when string == nil or string == ""
+
   @doc """
   Tests is given string is an UUID
 
@@ -167,9 +169,5 @@ defmodule WuunderUtils.String do
     else
       value
     end
-  end
-
-  defmodule Guards do
-    defguard is_empty(string) when string == nil or string == ""
   end
 end
