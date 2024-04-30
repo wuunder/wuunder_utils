@@ -4,6 +4,8 @@ defmodule WuunderUtils.Number do
   """
   alias WuunderUtils.Presence
 
+  import Decimal, only: [is_decimal: 1]
+
   @doc """
   Parses a string to an int. Returns `nil` if that didn't work out.
 
@@ -94,27 +96,32 @@ defmodule WuunderUtils.Number do
   def to_decimal(value) do
     cond do
       Presence.empty?(value) -> Decimal.new(0)
-      is_decimal?(value) -> value
+      is_decimal(value) -> value
       true -> Decimal.new("#{value}")
     end
   end
 
   @doc """
-  Tests if the given value is a Decimal
+  Adds two Decimal's together. Defaults back to 0.
 
   ## Examples
 
-      iex> WuunderUtils.Number.is_decimal?(1)
-      false
+      iex> WuunderUtils.Number.add_decimal(nil, nil)
+      Decimal.new("0")
 
-      iex> WuunderUtils.Number.is_decimal?(nil)
-      false
+      iex> WuunderUtils.Number.add_decimal(nil, Decimal.new("15.5"))
+      Decimal.new("15.5")
 
-      iex> WuunderUtils.Number.is_decimal?(Decimal.new("10"))
-      true
+      iex> WuunderUtils.Number.add_decimal(Decimal.new("6.5"), Decimal.new("15.5"))
+      Decimal.new("22.0")
+
+      iex> WuunderUtils.Number.add_decimal(Decimal.new("15.5"), nil)
+      Decimal.new("15.5")
 
   """
-  @spec is_decimal?(any()) :: boolean()
-  def is_decimal?(%Decimal{}), do: true
-  def is_decimal?(_), do: false
+  @spec add_decimal(nil | Decimal.t(), nil | Decimal.t()) :: Decimal.t()
+  def add_decimal(nil, nil), do: Decimal.new("0")
+  def add_decimal(nil, decimal) when is_decimal(decimal), do: decimal
+  def add_decimal(decimal, nil) when is_decimal(decimal), do: decimal
+  def add_decimal(d1, d2) when is_decimal(d1) and is_decimal(d2), do: Decimal.add(d1, d2)
 end
