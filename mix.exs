@@ -26,6 +26,7 @@ defmodule WuunderUtils.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
       {:ecto, "~> 3.11"},
       {:ex_doc, "~> 0.31", only: :dev, runtime: false}
     ]
