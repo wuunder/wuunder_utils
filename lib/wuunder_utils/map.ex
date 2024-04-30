@@ -448,7 +448,7 @@ defmodule WuunderUtils.Map do
         "order_lines_1_description" => "test 2",
         "meta_data" => "test"
       }
-  ```
+
   """
   @spec flatten_map(map(), Keyword.t()) :: map()
   def flatten_map(map, options \\ []) when is_map(map) and is_list(options),
@@ -513,7 +513,7 @@ defmodule WuunderUtils.Map do
         order_lines: [%{sku: "SKU01"}, %{sku: "SKU02"}, %{sku: "SKU03"}],
         shipment: %{wuunder_id: "WUUNDERID"}
       }
-  ```
+
   """
   @spec delete_all(map(), list(String.t() | atom())) :: map()
   def delete_all(map, keys_to_delete) when is_map(map) and is_list(keys_to_delete) do

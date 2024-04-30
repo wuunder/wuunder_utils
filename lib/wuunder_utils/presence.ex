@@ -5,7 +5,7 @@ defmodule WuunderUtils.Presence do
   alias WuunderUtils.String
   alias WuunderUtils.Map
 
-  @type t :: map() | String.t() | Ecto.Association.NotLoaded.t() | nil
+  @type t() :: map() | Elixir.String.t() | Ecto.Association.NotLoaded.t() | nil
 
   @doc """
   Checks if value is present
