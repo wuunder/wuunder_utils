@@ -138,8 +138,8 @@ defmodule WuunderUtils.String do
       iex> WuunderUtils.String.as_string("this is a string")
       "this is a string"
 
-      iex> WuunderUtils.String.as_string(%{a: 10, b: 30, c: 50})
-      "%{a: 10, b: 30, c: 50}"
+      iex> WuunderUtils.String.as_string(%{a: 10})
+      "%{a: 10}"
 
   """
   @spec as_string(any()) :: String.t()
