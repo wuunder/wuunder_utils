@@ -5,10 +5,11 @@ defmodule WuunderUtils.Map do
   alias WuunderUtils.Number
   alias WuunderUtils.Presence
 
-  import WuunderUtils.Map.Guards,
-    only: [is_valid_map_atom_key: 1, is_valid_map_binary_key: 1, is_valid_map_key: 1]
-
   @type map_key() :: atom() | binary()
+
+  defguard is_valid_map_atom_key(key) when is_atom(key) and is_nil(key) == false
+  defguard is_valid_map_binary_key(key) when is_binary(key) and key != ""
+  defguard is_valid_map_key(key) when is_binary(key) or (is_atom(key) and is_nil(key) == false)
 
   @doc """
   Retrieves a key from a map regardless of the key type (atom/string)
