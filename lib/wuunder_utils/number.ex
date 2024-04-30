@@ -124,4 +124,46 @@ defmodule WuunderUtils.Number do
   def add_decimal(nil, decimal) when is_decimal(decimal), do: decimal
   def add_decimal(decimal, nil) when is_decimal(decimal), do: decimal
   def add_decimal(d1, d2) when is_decimal(d1) and is_decimal(d2), do: Decimal.add(d1, d2)
+
+  @doc """
+  Tests if number is "present". Meaning: the number must not be 0, 0.0. Positive or negative is ok.
+  Also a tiny fraction just above 0 is allowed.
+
+  ## Examples
+
+      iex> WuunderUtils.Number.present?(-1)
+      true
+
+      iex> WuunderUtils.Number.present?(1)
+      true
+
+      iex> WuunderUtils.Number.present?(Decimal.new("1"))
+      true
+
+      iex> WuunderUtils.Number.present?(0.000001)
+      true
+
+      iex> WuunderUtils.Number.present?(0.0)
+      false
+
+      iex> WuunderUtils.Number.present?(0)
+      false
+
+      iex> WuunderUtils.Number.present?(Decimal.new("0"))
+      false
+
+      iex> WuunderUtils.Number.present?(Decimal.new("0.0"))
+      false
+  """
+  @spec present?(Decimal.t() | number() | nil) :: boolean()
+  def present?(nil), do: false
+  def present?(decimal) when is_decimal(decimal), do: Decimal.to_float(decimal) != 0.0
+  def present?(value) when is_integer(value), do: value != 0
+  def present?(value) when is_float(value), do: value != 0.0
+
+  @doc """
+  Reverse of present?
+  """
+  @spec empty?(Decimal.t() | number() | nil) :: boolean()
+  def empty?(value), do: not present?(value)
 end
