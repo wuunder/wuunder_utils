@@ -2,7 +2,6 @@ defmodule WuunderUtils.Maps do
   @moduledoc """
   Contains a set of helpers to deal with some complex stuff with Maps and Structs
   """
-  alias WuunderUtils.Numbers
   alias WuunderUtils.Presence
 
   @type map_key() :: atom() | binary()
@@ -58,34 +57,6 @@ defmodule WuunderUtils.Maps do
     else
       default
     end
-  end
-
-  @doc """
-  Lazy helper that grabs the field of a map and tries to convert it to a decimal in one pass
-
-  ## Examples
-
-      iex> WuunderUtils.Maps.get_field_as_decimal(%{value: "50"}, :value)
-      Decimal.new("50")
-
-      iex> WuunderUtils.Maps.get_field_as_decimal(%{value: Decimal.new("1337.5")}, :value)
-      Decimal.new("1337.5")
-
-      iex> WuunderUtils.Maps.get_field_as_decimal(%{value: 50}, :value)
-      Decimal.new("50")
-
-      iex> WuunderUtils.Maps.get_field_as_decimal(%{value: 50}, :weight)
-      Decimal.new("0")
-
-      iex> WuunderUtils.Maps.get_field_as_decimal(%{value: nil}, :value)
-      Decimal.new("0")
-
-  """
-  @spec get_field_as_decimal(map(), map_key()) :: Decimal.t()
-  def get_field_as_decimal(map, key) when is_map(map) and is_valid_map_key(key) do
-    map
-    |> get_field(key)
-    |> Numbers.to_decimal()
   end
 
   @doc """
@@ -229,9 +200,11 @@ defmodule WuunderUtils.Maps do
   This function deep structs, maps, lists etc. to a map
   and uses a set of default transformers as defined in `default_struct_fransform/0`.
 
-  It's also able to convert Ecto models to flat maps. It uses the defined Ecto fields for that.
-
   There is also an option to omit the `transform` option to add an extra set of transformers.
+
+  Took some inspiration from this great lib: https://github.com/prodis/miss-elixir/blob/0.1.5/lib/miss/map.ex
+
+  Note: It's also able to convert Ecto models to flat maps. It uses the defined Ecto fields for that.
 
   ## Examples
 
@@ -316,9 +289,6 @@ defmodule WuunderUtils.Maps do
 
       fun when is_function(fun, 1) ->
         fun.(struct)
-
-      :skip ->
-        struct
     end
   end
 
