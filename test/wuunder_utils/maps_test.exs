@@ -1,4 +1,4 @@
-defmodule WuunderUtils.MapTest do
+defmodule WuunderUtils.MapsTest do
   use ExUnit.Case
 
   defmodule TestStruct do
@@ -26,5 +26,5 @@ defmodule WuunderUtils.MapTest do
     end
   end
 
-  doctest WuunderUtils.Map
+  doctest WuunderUtils.Maps
 end

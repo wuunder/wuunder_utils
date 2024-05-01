@@ -1,4 +1,4 @@
-defmodule WuunderUtils.Number do
+defmodule WuunderUtils.Numbers do
   @moduledoc """
   Helper functions for floats, ints and Decimal's
   """
@@ -11,22 +11,22 @@ defmodule WuunderUtils.Number do
 
   ## Examples
 
-      iex> WuunderUtils.Number.parse_int("10005")
+      iex> WuunderUtils.Numbers.parse_int("10005")
       10005
 
-      iex> WuunderUtils.Number.parse_int(10005)
+      iex> WuunderUtils.Numbers.parse_int(10005)
       10005
 
-      iex> WuunderUtils.Number.parse_int(10.5)
+      iex> WuunderUtils.Numbers.parse_int(10.5)
       10.5
 
-      iex> WuunderUtils.Number.parse_int("10.50")
+      iex> WuunderUtils.Numbers.parse_int("10.50")
       10
 
-      iex> WuunderUtils.Number.parse_int("TEST10.50")
+      iex> WuunderUtils.Numbers.parse_int("TEST10.50")
       nil
 
-      iex> WuunderUtils.Number.parse_int("10TEST2")
+      iex> WuunderUtils.Numbers.parse_int("10TEST2")
       10
 
   """
@@ -50,22 +50,22 @@ defmodule WuunderUtils.Number do
 
   ## Examples
 
-      iex> WuunderUtils.Number.parse_float("10005")
+      iex> WuunderUtils.Numbers.parse_float("10005")
       10005.0
 
-      iex> WuunderUtils.Number.parse_float(10005)
+      iex> WuunderUtils.Numbers.parse_float(10005)
       10005
 
-      iex> WuunderUtils.Number.parse_float(10.5)
+      iex> WuunderUtils.Numbers.parse_float(10.5)
       10.5
 
-      iex> WuunderUtils.Number.parse_float("10.50")
+      iex> WuunderUtils.Numbers.parse_float("10.50")
       10.5
 
-      iex> WuunderUtils.Number.parse_float("TEST10.50")
+      iex> WuunderUtils.Numbers.parse_float("TEST10.50")
       nil
 
-      iex> WuunderUtils.Number.parse_float("10TEST2")
+      iex> WuunderUtils.Numbers.parse_float("10TEST2")
       10.0
   """
   @spec parse_float(any()) :: integer() | float() | nil
@@ -86,10 +86,10 @@ defmodule WuunderUtils.Number do
 
   ## Examples
 
-      iex> WuunderUtils.Number.to_decimal("15")
+      iex> WuunderUtils.Numbers.to_decimal("15")
       Decimal.new("15")
 
-      iex> WuunderUtils.Number.to_decimal("15")
+      iex> WuunderUtils.Numbers.to_decimal("15")
       Decimal.new("15")
   """
   @spec to_decimal(any()) :: Decimal.t()
@@ -106,16 +106,16 @@ defmodule WuunderUtils.Number do
 
   ## Examples
 
-      iex> WuunderUtils.Number.add_decimal(nil, nil)
+      iex> WuunderUtils.Numbers.add_decimal(nil, nil)
       Decimal.new("0")
 
-      iex> WuunderUtils.Number.add_decimal(nil, Decimal.new("15.5"))
+      iex> WuunderUtils.Numbers.add_decimal(nil, Decimal.new("15.5"))
       Decimal.new("15.5")
 
-      iex> WuunderUtils.Number.add_decimal(Decimal.new("6.5"), Decimal.new("15.5"))
+      iex> WuunderUtils.Numbers.add_decimal(Decimal.new("6.5"), Decimal.new("15.5"))
       Decimal.new("22.0")
 
-      iex> WuunderUtils.Number.add_decimal(Decimal.new("15.5"), nil)
+      iex> WuunderUtils.Numbers.add_decimal(Decimal.new("15.5"), nil)
       Decimal.new("15.5")
 
   """
@@ -131,28 +131,28 @@ defmodule WuunderUtils.Number do
 
   ## Examples
 
-      iex> WuunderUtils.Number.present?(-1)
+      iex> WuunderUtils.Numbers.present?(-1)
       true
 
-      iex> WuunderUtils.Number.present?(1)
+      iex> WuunderUtils.Numbers.present?(1)
       true
 
-      iex> WuunderUtils.Number.present?(Decimal.new("1"))
+      iex> WuunderUtils.Numbers.present?(Decimal.new("1"))
       true
 
-      iex> WuunderUtils.Number.present?(0.000001)
+      iex> WuunderUtils.Numbers.present?(0.000001)
       true
 
-      iex> WuunderUtils.Number.present?(0.0)
+      iex> WuunderUtils.Numbers.present?(0.0)
       false
 
-      iex> WuunderUtils.Number.present?(0)
+      iex> WuunderUtils.Numbers.present?(0)
       false
 
-      iex> WuunderUtils.Number.present?(Decimal.new("0"))
+      iex> WuunderUtils.Numbers.present?(Decimal.new("0"))
       false
 
-      iex> WuunderUtils.Number.present?(Decimal.new("0.0"))
+      iex> WuunderUtils.Numbers.present?(Decimal.new("0.0"))
       false
   """
   @spec present?(Decimal.t() | number() | nil) :: boolean()

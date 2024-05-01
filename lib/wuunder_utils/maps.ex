@@ -1,8 +1,8 @@
-defmodule WuunderUtils.Map do
+defmodule WuunderUtils.Maps do
   @moduledoc """
   Contains a set of helpers to deal with some complex stuff with Maps and Structs
   """
-  alias WuunderUtils.Number
+  alias WuunderUtils.Numbers
   alias WuunderUtils.Presence
 
   @type map_key() :: atom() | binary()
@@ -18,25 +18,25 @@ defmodule WuunderUtils.Map do
 
   ## Examples
 
-      iex> WuunderUtils.Map.get_field(%{value: 20}, :value)
+      iex> WuunderUtils.Maps.get_field(%{value: 20}, :value)
       20
 
-      iex> WuunderUtils.Map.get_field(%{"value" => 20}, :value)
+      iex> WuunderUtils.Maps.get_field(%{"value" => 20}, :value)
       20
 
-      iex> WuunderUtils.Map.get_field(%{value: 20}, "value")
+      iex> WuunderUtils.Maps.get_field(%{value: 20}, "value")
       nil
 
-      iex> WuunderUtils.Map.get_field(%{value: 20}, "non-existent")
+      iex> WuunderUtils.Maps.get_field(%{value: 20}, "non-existent")
       nil
 
-      iex> WuunderUtils.Map.get_field(%{value: 20}, :weight)
+      iex> WuunderUtils.Maps.get_field(%{value: 20}, :weight)
       nil
 
-      iex> WuunderUtils.Map.get_field(%{value: 20}, :weight, 350)
+      iex> WuunderUtils.Maps.get_field(%{value: 20}, :weight, 350)
       350
 
-      iex> WuunderUtils.Map.get_field(%{value: 20}, "currency", "EUR")
+      iex> WuunderUtils.Maps.get_field(%{value: 20}, "currency", "EUR")
       "EUR"
 
   """
@@ -65,19 +65,19 @@ defmodule WuunderUtils.Map do
 
   ## Examples
 
-      iex> WuunderUtils.Map.get_field_as_decimal(%{value: "50"}, :value)
+      iex> WuunderUtils.Maps.get_field_as_decimal(%{value: "50"}, :value)
       Decimal.new("50")
 
-      iex> WuunderUtils.Map.get_field_as_decimal(%{value: Decimal.new("1337.5")}, :value)
+      iex> WuunderUtils.Maps.get_field_as_decimal(%{value: Decimal.new("1337.5")}, :value)
       Decimal.new("1337.5")
 
-      iex> WuunderUtils.Map.get_field_as_decimal(%{value: 50}, :value)
+      iex> WuunderUtils.Maps.get_field_as_decimal(%{value: 50}, :value)
       Decimal.new("50")
 
-      iex> WuunderUtils.Map.get_field_as_decimal(%{value: 50}, :weight)
+      iex> WuunderUtils.Maps.get_field_as_decimal(%{value: 50}, :weight)
       Decimal.new("0")
 
-      iex> WuunderUtils.Map.get_field_as_decimal(%{value: nil}, :value)
+      iex> WuunderUtils.Maps.get_field_as_decimal(%{value: nil}, :value)
       Decimal.new("0")
 
   """
@@ -85,7 +85,7 @@ defmodule WuunderUtils.Map do
   def get_field_as_decimal(map, key) when is_map(map) and is_valid_map_key(key) do
     map
     |> get_field(key)
-    |> Number.to_decimal()
+    |> Numbers.to_decimal()
   end
 
   @doc """
@@ -98,16 +98,16 @@ defmodule WuunderUtils.Map do
 
   ## Examples
 
-      iex> WuunderUtils.Map.put_field(%{value: 20}, :weight, 350)
+      iex> WuunderUtils.Maps.put_field(%{value: 20}, :weight, 350)
       %{value: 20, weight: 350}
 
-      iex> WuunderUtils.Map.put_field(%{value: 20}, "weight", 350)
+      iex> WuunderUtils.Maps.put_field(%{value: 20}, "weight", 350)
       %{:value => 20, "weight" => 350}
 
-      iex> WuunderUtils.Map.put_field(%{"weight" => 350}, :value, 25)
+      iex> WuunderUtils.Maps.put_field(%{"weight" => 350}, :value, 25)
       %{"weight" => 350, "value" => 25}
 
-      iex> WuunderUtils.Map.put_field(%{"weight" => 350}, "value", 25)
+      iex> WuunderUtils.Maps.put_field(%{"weight" => 350}, "value", 25)
       %{"weight" => 350, "value" => 25}
 
   """
@@ -129,16 +129,16 @@ defmodule WuunderUtils.Map do
 
   ## Examples
 
-      iex> WuunderUtils.Map.delete_field(%{length: 255, weight: 100}, :length)
+      iex> WuunderUtils.Maps.delete_field(%{length: 255, weight: 100}, :length)
       %{weight: 100}
 
-      iex> WuunderUtils.Map.delete_field(%{length: 255, weight: 100}, "length")
+      iex> WuunderUtils.Maps.delete_field(%{length: 255, weight: 100}, "length")
       %{weight: 100, length: 255}
 
-      iex> WuunderUtils.Map.delete_field(%{"value" => 50, "currency" => "EUR"}, "currency")
+      iex> WuunderUtils.Maps.delete_field(%{"value" => 50, "currency" => "EUR"}, "currency")
       %{"value" => 50}
 
-      iex> WuunderUtils.Map.delete_field(%{"value" => 50, "currency" => "EUR"}, :currency)
+      iex> WuunderUtils.Maps.delete_field(%{"value" => 50, "currency" => "EUR"}, :currency)
       %{"value" => 50}
 
   """
@@ -159,13 +159,13 @@ defmodule WuunderUtils.Map do
 
   ## Examples
 
-      iex> WuunderUtils.Map.has_only_atom_keys?(%{a: 1, b: 2})
+      iex> WuunderUtils.Maps.has_only_atom_keys?(%{a: 1, b: 2})
       true
 
-      iex> WuunderUtils.Map.has_only_atom_keys?(%{:a => 1, "b" => 2})
+      iex> WuunderUtils.Maps.has_only_atom_keys?(%{:a => 1, "b" => 2})
       false
 
-      iex> WuunderUtils.Map.has_only_atom_keys?(%{"a" => 1, "b" => 2})
+      iex> WuunderUtils.Maps.has_only_atom_keys?(%{"a" => 1, "b" => 2})
       false
 
   """
@@ -183,13 +183,13 @@ defmodule WuunderUtils.Map do
 
   ## Examples
 
-      iex> WuunderUtils.Map.alias_field(%{country: "NL"}, :country, :country_code)
+      iex> WuunderUtils.Maps.alias_field(%{country: "NL"}, :country, :country_code)
       %{country_code: "NL"}
 
-      iex> WuunderUtils.Map.alias_field(%{"country" => "NL"}, :country, :country_code)
+      iex> WuunderUtils.Maps.alias_field(%{"country" => "NL"}, :country, :country_code)
       %{"country_code" => "NL"}
 
-      iex> WuunderUtils.Map.alias_field(%{street_name: "Straatnaam"}, :street, :street_address)
+      iex> WuunderUtils.Maps.alias_field(%{street_name: "Straatnaam"}, :street, :street_address)
       %{street_name: "Straatnaam"}
 
   """
@@ -213,7 +213,7 @@ defmodule WuunderUtils.Map do
 
   ## Examples
 
-      iex> WuunderUtils.Map.alias_fields(%{country: "NL", street: "Straat", number: 666}, %{country: :country_code, street: :street_name, number: :house_number})
+      iex> WuunderUtils.Maps.alias_fields(%{country: "NL", street: "Straat", number: 666}, %{country: :country_code, street: :street_name, number: :house_number})
       %{country_code: "NL", house_number: 666, street_name: "Straat"}
 
   """
@@ -235,7 +235,7 @@ defmodule WuunderUtils.Map do
 
   ## Examples
 
-      iex> WuunderUtils.Map.from_struct(%TestStruct{
+      iex> WuunderUtils.Maps.from_struct(%TestStruct{
       ...>   first_name: "Peter",
       ...>   last_name: "Pan",
       ...>   date_of_birth: ~D[1980-01-02],
@@ -253,7 +253,7 @@ defmodule WuunderUtils.Map do
         country: %{code: "UK"}
       }
 
-      iex> WuunderUtils.Map.from_struct(
+      iex> WuunderUtils.Maps.from_struct(
       ...>   %TestStruct{
       ...>     first_name: "Peter",
       ...>     last_name: "Pan",
@@ -274,7 +274,7 @@ defmodule WuunderUtils.Map do
         country: "COUNTRY:UK"
       }
 
-      iex> WuunderUtils.Map.from_struct(
+      iex> WuunderUtils.Maps.from_struct(
       ...>   %TestStruct{
       ...>     address: %TestSchema{
       ...>       street: "Straat",
@@ -339,13 +339,13 @@ defmodule WuunderUtils.Map do
 
   ## Examples
 
-      iex> WuunderUtils.Map.put_when(%{street: "Straat"}, 1 == 1, :number, 13)
+      iex> WuunderUtils.Maps.put_when(%{street: "Straat"}, 1 == 1, :number, 13)
       %{number: 13, street: "Straat"}
 
-      iex> WuunderUtils.Map.put_when(%{street: "Straat"}, fn -> "value" == "value" end, :number, 13)
+      iex> WuunderUtils.Maps.put_when(%{street: "Straat"}, fn -> "value" == "value" end, :number, 13)
       %{number: 13, street: "Straat"}
 
-      iex> WuunderUtils.Map.put_when(%{street: "Straat"}, 10 > 20, :number, 13)
+      iex> WuunderUtils.Maps.put_when(%{street: "Straat"}, 10 > 20, :number, 13)
       %{street: "Straat"}
 
   """
@@ -365,13 +365,13 @@ defmodule WuunderUtils.Map do
 
   ## Examples
 
-      iex> WuunderUtils.Map.put_if_present(%{street: "Straat"}, :street, "Laan")
+      iex> WuunderUtils.Maps.put_if_present(%{street: "Straat"}, :street, "Laan")
       %{street: "Laan"}
 
-      iex> WuunderUtils.Map.put_if_present(%{street: "Straat"}, :street, nil)
+      iex> WuunderUtils.Maps.put_if_present(%{street: "Straat"}, :street, nil)
       %{street: "Straat"}
 
-      iex> WuunderUtils.Map.put_if_present(%{street: "Straat"}, :street, "     ")
+      iex> WuunderUtils.Maps.put_if_present(%{street: "Straat"}, :street, "     ")
       %{street: "Straat"}
 
   """
@@ -384,13 +384,13 @@ defmodule WuunderUtils.Map do
 
   ## Examples
 
-      iex> WuunderUtils.Map.put_if_not_nil(%{street: "Straat"}, :street, "Laan")
+      iex> WuunderUtils.Maps.put_if_not_nil(%{street: "Straat"}, :street, "Laan")
       %{street: "Laan"}
 
-      iex> WuunderUtils.Map.put_if_not_nil(%{street: "Straat"}, :street, nil)
+      iex> WuunderUtils.Maps.put_if_not_nil(%{street: "Straat"}, :street, nil)
       %{street: "Straat"}
 
-      iex> WuunderUtils.Map.put_if_not_nil(%{street: "Straat"}, :street, "     ")
+      iex> WuunderUtils.Maps.put_if_not_nil(%{street: "Straat"}, :street, "     ")
       %{street: "     "}
   """
   @spec put_if_not_nil(map(), map_key(), any()) :: map()
@@ -404,19 +404,19 @@ defmodule WuunderUtils.Map do
 
   ## Examples
 
-      iex> WuunderUtils.Map.present?(nil)
+      iex> WuunderUtils.Maps.present?(nil)
       false
 
-      iex> WuunderUtils.Map.present?(%{})
+      iex> WuunderUtils.Maps.present?(%{})
       false
 
-      iex> WuunderUtils.Map.present?(%{a: 1})
+      iex> WuunderUtils.Maps.present?(%{a: 1})
       true
 
-      iex> WuunderUtils.Map.present?(%TestStruct{})
+      iex> WuunderUtils.Maps.present?(%TestStruct{})
       true
 
-      iex> WuunderUtils.Map.present?(%Ecto.Association.NotLoaded{})
+      iex> WuunderUtils.Maps.present?(%Ecto.Association.NotLoaded{})
       false
 
   """
@@ -437,7 +437,7 @@ defmodule WuunderUtils.Map do
 
   ## Example
 
-      iex> WuunderUtils.Map.flatten_map(%{
+      iex> WuunderUtils.Maps.flatten_map(%{
       ...>   test: "123",
       ...>   order_lines: [
       ...>     %{sku: "123", description: "test"},
@@ -456,7 +456,7 @@ defmodule WuunderUtils.Map do
         "meta.data" => "test"
       }
 
-      iex> WuunderUtils.Map.flatten_map(
+      iex> WuunderUtils.Maps.flatten_map(
       ...>   %{
       ...>     test: "123",
       ...>     order_lines: [
@@ -521,7 +521,7 @@ defmodule WuunderUtils.Map do
 
   ## Examples
 
-      iex> WuunderUtils.Map.delete_all(
+      iex> WuunderUtils.Maps.delete_all(
       ...>   %{
       ...>      shipment: %{
       ...>        id: "shipment-id",

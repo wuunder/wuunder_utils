@@ -1,4 +1,4 @@
-defmodule WuunderUtils.Result do
+defmodule WuunderUtils.Results do
   @moduledoc """
   A set of handy helpers to deal with {:ok, _} or {:error, _} tuples
   """
@@ -8,19 +8,19 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-      iex> WuunderUtils.Result.all_ok?([
+      iex> WuunderUtils.Results.all_ok?([
       ...>   {:ok, %Shipment{id: 1}},
       ...>   {:ok, %Shipment{id: 2}}
       ...> ])
       true
 
-      iex> WuunderUtils.Result.all_ok?(:ok)
+      iex> WuunderUtils.Results.all_ok?(:ok)
       true
 
-      iex> WuunderUtils.Result.all_ok?({:ok, %Shipment{id: 2}})
+      iex> WuunderUtils.Results.all_ok?({:ok, %Shipment{id: 2}})
       true
 
-      iex> WuunderUtils.Result.all_ok?([{:ok, %Shipment{id: 2}}, {:error, %Shipment{id: 3}}])
+      iex> WuunderUtils.Results.all_ok?([{:ok, %Shipment{id: 2}}, {:error, %Shipment{id: 3}}])
       false
 
   """
@@ -34,19 +34,19 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-      iex> WuunderUtils.Result.all_error?([
+      iex> WuunderUtils.Results.all_error?([
       ...>   {:error, %Shipment{id: 1}},
       ...>   {:error, %Shipment{id: 2}}
       ...> ])
       true
 
-      iex> WuunderUtils.Result.all_error?(:error)
+      iex> WuunderUtils.Results.all_error?(:error)
       true
 
-      iex> WuunderUtils.Result.all_error?({:error, %Shipment{id: 2}})
+      iex> WuunderUtils.Results.all_error?({:error, %Shipment{id: 2}})
       true
 
-      iex> WuunderUtils.Result.all_error?([{:ok, %Shipment{id: 2}}, {:error, %Shipment{id: 3}}])
+      iex> WuunderUtils.Results.all_error?([{:ok, %Shipment{id: 2}}, {:error, %Shipment{id: 3}}])
       false
 
   """
@@ -60,16 +60,16 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-      iex> WuunderUtils.Result.has_ok?(:ok)
+      iex> WuunderUtils.Results.has_ok?(:ok)
       true
 
-      iex> WuunderUtils.Result.has_ok?({:ok, "hello world"})
+      iex> WuunderUtils.Results.has_ok?({:ok, "hello world"})
       true
 
-      iex> WuunderUtils.Result.has_ok?([{:ok, "hello world"}, {:error, :faulty}])
+      iex> WuunderUtils.Results.has_ok?([{:ok, "hello world"}, {:error, :faulty}])
       true
 
-      iex> WuunderUtils.Result.has_ok?([{:error, "connection lost"}, {:error, :faulty}])
+      iex> WuunderUtils.Results.has_ok?([{:error, "connection lost"}, {:error, :faulty}])
       false
 
   """
@@ -83,7 +83,7 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-      iex> WuunderUtils.Result.has_error?([
+      iex> WuunderUtils.Results.has_error?([
       ...>   {:ok, %Shipment{id: 1}},
       ...>   {:ok, %Shipment{id: 2}},
       ...>   {:error, :creation_error},
@@ -91,13 +91,13 @@ defmodule WuunderUtils.Result do
       ...> ])
       true
 
-      iex> WuunderUtils.Result.has_error?(:error)
+      iex> WuunderUtils.Results.has_error?(:error)
       true
 
-      iex> WuunderUtils.Result.has_error?({:error, :creating_error})
+      iex> WuunderUtils.Results.has_error?({:error, :creating_error})
       true
 
-      iex> WuunderUtils.Result.has_error?({:ok, %Shipment{id: 1}})
+      iex> WuunderUtils.Results.has_error?({:ok, %Shipment{id: 1}})
       false
 
   """
@@ -117,7 +117,7 @@ defmodule WuunderUtils.Result do
        ...>   {:error, :creation_error}
        ...> ]
        ...>
-       ...> WuunderUtils.Result.get_error(results)
+       ...> WuunderUtils.Results.get_error(results)
        :creation_error
 
   """
@@ -148,7 +148,7 @@ defmodule WuunderUtils.Result do
        ...>   {:error, :creation_error}
        ...> ]
        ...>
-       ...> WuunderUtils.Result.get_errors(results)
+       ...> WuunderUtils.Results.get_errors(results)
        ["other-error", :creation_error]
 
   """
@@ -167,13 +167,13 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-       iex> WuunderUtils.Result.get_error_as_result([{:ok, "value"}, {:error, "something went wrong"}])
+       iex> WuunderUtils.Results.get_error_as_result([{:ok, "value"}, {:error, "something went wrong"}])
        {:error, "something went wrong"}
 
-       iex> WuunderUtils.Result.get_error_as_result({:ok, "value"})
+       iex> WuunderUtils.Results.get_error_as_result({:ok, "value"})
        nil
 
-       iex> WuunderUtils.Result.get_error_as_result("some-value")
+       iex> WuunderUtils.Results.get_error_as_result("some-value")
        nil
 
   """
@@ -192,10 +192,10 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-       iex> WuunderUtils.Result.get_errors_as_result({:error, "some-value"})
+       iex> WuunderUtils.Results.get_errors_as_result({:error, "some-value"})
        {:error, ["some-value"]}
 
-       iex> WuunderUtils.Result.get_errors_as_result([{:error, "value-1"}, {:error, "value-2"}, {:ok, "value"}])
+       iex> WuunderUtils.Results.get_errors_as_result([{:error, "value-1"}, {:error, "value-2"}, {:ok, "value"}])
        {:error, ["value-1", "value-2"]}
 
   """
@@ -220,7 +220,7 @@ defmodule WuunderUtils.Result do
        ...>   {:error, :creation_error}
        ...> ]
        ...>
-       ...> WuunderUtils.Result.get_ok(results)
+       ...> WuunderUtils.Results.get_ok(results)
        %Shipment{id: 1}
 
   """
@@ -251,7 +251,7 @@ defmodule WuunderUtils.Result do
        ...>   {:error, :creation_error}
        ...> ]
        ...>
-       ...> WuunderUtils.Result.get_oks(results)
+       ...> WuunderUtils.Results.get_oks(results)
        [%Shipment{id: 1}, %Shipment{id: 2}]
 
   """
@@ -270,13 +270,13 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-         iex> WuunderUtils.Result.get_ok_as_result({:ok, "some-value"})
+         iex> WuunderUtils.Results.get_ok_as_result({:ok, "some-value"})
          {:ok, "some-value"}
 
-         iex> WuunderUtils.Result.get_ok_as_result([{:ok, "value-1"}, {:error, "error"}, {:ok, "value-2"}])
+         iex> WuunderUtils.Results.get_ok_as_result([{:ok, "value-1"}, {:error, "error"}, {:ok, "value-2"}])
          {:ok, "value-1"}
 
-         iex> WuunderUtils.Result.get_ok_as_result({:error, "value"})
+         iex> WuunderUtils.Results.get_ok_as_result({:error, "value"})
          nil
 
   """
@@ -295,10 +295,10 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-         iex> WuunderUtils.Result.get_oks_or_error_result([{:ok, "value"}, {:ok, "value-2"}, :ok])
+         iex> WuunderUtils.Results.get_oks_or_error_result([{:ok, "value"}, {:ok, "value-2"}, :ok])
          ["value", "value-2", nil]
 
-         iex> WuunderUtils.Result.get_oks_or_error_result([{:ok, "value"}, {:ok, "value-2"}, {:error, "faulty"}])
+         iex> WuunderUtils.Results.get_oks_or_error_result([{:ok, "value"}, {:ok, "value-2"}, {:error, "faulty"}])
          {:error, "faulty"}
 
   """
@@ -320,13 +320,13 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-      iex> WuunderUtils.Result.get_oks_as_result({:ok, "some-value"})
+      iex> WuunderUtils.Results.get_oks_as_result({:ok, "some-value"})
       {:ok, ["some-value"]}
 
-      iex> WuunderUtils.Result.get_oks_as_result([{:ok, "value-1"}, {:ok, "value-2"}])
+      iex> WuunderUtils.Results.get_oks_as_result([{:ok, "value-1"}, {:ok, "value-2"}])
       {:ok, ["value-1", "value-2"]}
 
-      iex> WuunderUtils.Result.get_oks_as_result({:error, "value"})
+      iex> WuunderUtils.Results.get_oks_as_result({:error, "value"})
       []
 
   """
@@ -346,13 +346,13 @@ defmodule WuunderUtils.Result do
 
   ## Example
 
-      iex> WuunderUtils.Result.get_as_result([{:ok, "value"}, {:ok, "value-2"}])
+      iex> WuunderUtils.Results.get_as_result([{:ok, "value"}, {:ok, "value-2"}])
       {:ok, "value"}
 
-      iex> WuunderUtils.Result.get_as_result([{:ok, "value"}, {:error, "value-2"}])
+      iex> WuunderUtils.Results.get_as_result([{:ok, "value"}, {:error, "value-2"}])
       {:error, "value-2"}
 
-      iex> WuunderUtils.Result.get_as_result([{:error, "value"}, {:error, "value-2"}])
+      iex> WuunderUtils.Results.get_as_result([{:error, "value"}, {:error, "value-2"}])
       {:error, "value"}
 
   """
@@ -379,7 +379,7 @@ defmodule WuunderUtils.Result do
       ...>   {:error, :creation_error}
       ...> ]
       ...>
-      ...> WuunderUtils.Result.get_success(results)
+      ...> WuunderUtils.Results.get_success(results)
       %Shipment{id: 1}
 
   """
@@ -411,7 +411,7 @@ defmodule WuunderUtils.Result do
       ...>   {:error, :creation_error}
       ...> ]
       ...>
-      ...> WuunderUtils.Result.get_successes(results)
+      ...> WuunderUtils.Results.get_successes(results)
       [%Shipment{id: 1}, %Shipment{id: 2}, %Shipment{id: 3}]
 
   """
@@ -429,19 +429,19 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-      iex> WuunderUtils.Result.is_ok?({:ok, "value"})
+      iex> WuunderUtils.Results.is_ok?({:ok, "value"})
       true
 
-      iex> WuunderUtils.Result.is_ok?(:ok)
+      iex> WuunderUtils.Results.is_ok?(:ok)
       true
 
-      iex> WuunderUtils.Result.is_ok?("some-value")
+      iex> WuunderUtils.Results.is_ok?("some-value")
       false
 
-      iex> WuunderUtils.Result.is_ok?({:error, "error message"})
+      iex> WuunderUtils.Results.is_ok?({:error, "error message"})
       false
 
-      iex> WuunderUtils.Result.is_ok?([])
+      iex> WuunderUtils.Results.is_ok?([])
       false
 
   """
@@ -460,16 +460,16 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-      iex> WuunderUtils.Result.is_success?({:ok, "value"})
+      iex> WuunderUtils.Results.is_success?({:ok, "value"})
       true
 
-      iex> WuunderUtils.Result.is_success?([])
+      iex> WuunderUtils.Results.is_success?([])
       true
 
-      iex> WuunderUtils.Result.is_success?(nil)
+      iex> WuunderUtils.Results.is_success?(nil)
       true
 
-      iex> WuunderUtils.Result.is_success?({:error, "error message"})
+      iex> WuunderUtils.Results.is_success?({:error, "error message"})
       false
 
   """
@@ -486,13 +486,13 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-      iex> WuunderUtils.Result.is_error?({:error, "error message"})
+      iex> WuunderUtils.Results.is_error?({:error, "error message"})
       true
 
-      iex> WuunderUtils.Result.is_error?({:ok, "value"})
+      iex> WuunderUtils.Results.is_error?({:ok, "value"})
       false
 
-      iex> WuunderUtils.Result.is_error?([])
+      iex> WuunderUtils.Results.is_error?([])
       false
 
   """
@@ -508,19 +508,19 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-      iex> WuunderUtils.Result.is_result?({:ok, "value"})
+      iex> WuunderUtils.Results.is_result?({:ok, "value"})
       true
 
-      iex> WuunderUtils.Result.is_result?({:error, "value"})
+      iex> WuunderUtils.Results.is_result?({:error, "value"})
       true
 
-      iex> WuunderUtils.Result.is_result?(:ok)
+      iex> WuunderUtils.Results.is_result?(:ok)
       true
 
-      iex> WuunderUtils.Result.is_result?(:error)
+      iex> WuunderUtils.Results.is_result?(:error)
       true
 
-      iex> WuunderUtils.Result.is_result?("value")
+      iex> WuunderUtils.Results.is_result?("value")
       false
 
   """
@@ -532,19 +532,19 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-      iex> WuunderUtils.Result.get_result_code({:ok, "value"})
+      iex> WuunderUtils.Results.get_result_code({:ok, "value"})
       :ok
 
-      iex> WuunderUtils.Result.get_result_code(:ok)
+      iex> WuunderUtils.Results.get_result_code(:ok)
       :ok
 
-      iex> WuunderUtils.Result.get_result_code({:error, "value", "whatever"})
+      iex> WuunderUtils.Results.get_result_code({:error, "value", "whatever"})
       :error
 
-      iex> WuunderUtils.Result.get_result_code(:error)
+      iex> WuunderUtils.Results.get_result_code(:error)
       :error
 
-      iex> WuunderUtils.Result.get_result_code("value")
+      iex> WuunderUtils.Results.get_result_code("value")
       nil
 
   """
@@ -565,25 +565,25 @@ defmodule WuunderUtils.Result do
 
   ## Examples
 
-      iex> WuunderUtils.Result.get_result_value({:ok, "value-1"})
+      iex> WuunderUtils.Results.get_result_value({:ok, "value-1"})
       "value-1"
 
-      iex> WuunderUtils.Result.get_result_value({:ok, "value-1", "value-2"})
+      iex> WuunderUtils.Results.get_result_value({:ok, "value-1", "value-2"})
       {"value-1", "value-2"}
 
-      iex> WuunderUtils.Result.get_result_value({:error, :internal_server_error})
+      iex> WuunderUtils.Results.get_result_value({:error, :internal_server_error})
       :internal_server_error
 
-      iex> WuunderUtils.Result.get_result_value({:error, :error_a, :error_b, :error_c})
+      iex> WuunderUtils.Results.get_result_value({:error, :error_a, :error_b, :error_c})
       {:error_a, :error_b, :error_c}
 
-      iex> WuunderUtils.Result.get_result_value("any-value")
+      iex> WuunderUtils.Results.get_result_value("any-value")
       "any-value"
 
-      iex> WuunderUtils.Result.get_result_value(:ok)
+      iex> WuunderUtils.Results.get_result_value(:ok)
       nil
 
-      iex> WuunderUtils.Result.get_result_value(:error)
+      iex> WuunderUtils.Results.get_result_value(:error)
       nil
 
   """
@@ -626,7 +626,7 @@ defmodule WuunderUtils.Result do
       ...>   nil
       ...> ]
       ...>
-      ...> WuunderUtils.Result.get_success_values(results)
+      ...> WuunderUtils.Results.get_success_values(results)
       ["value1", nil, {"value2", "value3"}, {"value4", "value5"}, nil]
 
   """

@@ -2,9 +2,9 @@ defmodule WuunderUtils.Presence do
   @moduledoc """
   Acts as proxy module towards present? functions of String and Map
   """
-  alias WuunderUtils.Number
-  alias WuunderUtils.String
-  alias WuunderUtils.Map
+  alias WuunderUtils.Numbers
+  alias WuunderUtils.Strings
+  alias WuunderUtils.Maps
 
   import Decimal, only: [is_decimal: 1]
 
@@ -39,9 +39,9 @@ defmodule WuunderUtils.Presence do
 
   """
   @spec present?(t()) :: boolean()
-  def present?(value) when is_number(value) or is_decimal(value), do: Number.present?(value)
-  def present?(map) when is_map(map), do: Map.present?(map)
-  def present?(value) when is_binary(value) or is_nil(value), do: String.present?(value)
+  def present?(value) when is_number(value) or is_decimal(value), do: Numbers.present?(value)
+  def present?(map) when is_map(map), do: Maps.present?(map)
+  def present?(value) when is_binary(value) or is_nil(value), do: Strings.present?(value)
   def present?([]), do: false
   def present?([_head | _tail]), do: true
 

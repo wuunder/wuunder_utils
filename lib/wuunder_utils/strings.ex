@@ -1,4 +1,4 @@
-defmodule WuunderUtils.String do
+defmodule WuunderUtils.Strings do
   @moduledoc """
   Contains a set of String helpers
   """
@@ -10,16 +10,16 @@ defmodule WuunderUtils.String do
 
   ## Examples
 
-      iex> WuunderUtils.String.uuid?("")
+      iex> WuunderUtils.Strings.uuid?("")
       false
 
-      iex> WuunderUtils.String.uuid?("39169cb3-03ea")
+      iex> WuunderUtils.Strings.uuid?("39169cb3-03ea")
       false
 
-      iex> WuunderUtils.String.uuid?("39169CB3-03EA-47E5-9B3C-BD4C53E7FE3F")
+      iex> WuunderUtils.Strings.uuid?("39169CB3-03EA-47E5-9B3C-BD4C53E7FE3F")
       true
 
-      iex> WuunderUtils.String.uuid?("39169cb3-03ea-47e5-9b3c-bd4c53e7fe3f")
+      iex> WuunderUtils.Strings.uuid?("39169cb3-03ea-47e5-9b3c-bd4c53e7fe3f")
       true
 
   """
@@ -33,10 +33,10 @@ defmodule WuunderUtils.String do
 
   ## Examples
 
-      iex> WuunderUtils.String.capitalize("this is sparta!")
+      iex> WuunderUtils.Strings.capitalize("this is sparta!")
       "This Is Sparta!"
 
-      iex> WuunderUtils.String.capitalize("is this spArTA?")
+      iex> WuunderUtils.Strings.capitalize("is this spArTA?")
       "Is This Sparta?"
 
   """
@@ -54,13 +54,13 @@ defmodule WuunderUtils.String do
 
   ## Examples
 
-      iex> WuunderUtils.String.empty?(nil)
+      iex> WuunderUtils.Strings.empty?(nil)
       true
 
-      iex> WuunderUtils.String.empty?("   ")
+      iex> WuunderUtils.Strings.empty?("   ")
       true
 
-      iex> WuunderUtils.String.empty?("a string")
+      iex> WuunderUtils.Strings.empty?("a string")
       false
 
   """
@@ -73,13 +73,13 @@ defmodule WuunderUtils.String do
 
   ## Examples
 
-      iex> WuunderUtils.String.present?("   ")
+      iex> WuunderUtils.Strings.present?("   ")
       false
 
-      iex> WuunderUtils.String.present?(nil)
+      iex> WuunderUtils.Strings.present?(nil)
       false
 
-      iex> WuunderUtils.String.present?("yes")
+      iex> WuunderUtils.Strings.present?("yes")
       true
 
   """
@@ -91,16 +91,16 @@ defmodule WuunderUtils.String do
 
   ## Examples
 
-      iex> WuunderUtils.String.empty_to_nil(nil)
+      iex> WuunderUtils.Strings.empty_to_nil(nil)
       nil
 
-      iex> WuunderUtils.String.empty_to_nil("")
+      iex> WuunderUtils.Strings.empty_to_nil("")
       nil
 
-      iex> WuunderUtils.String.empty_to_nil("    ")
+      iex> WuunderUtils.Strings.empty_to_nil("    ")
       nil
 
-      iex> WuunderUtils.String.empty_to_nil("this_is_a_string")
+      iex> WuunderUtils.Strings.empty_to_nil("this_is_a_string")
       "this_is_a_string"
   """
   @spec empty_to_nil(String.t() | nil) :: nil | String.t()
@@ -117,7 +117,7 @@ defmodule WuunderUtils.String do
 
   ## Examples
 
-      iex> WuunderUtils.String.clean(" well    this is a sentence")
+      iex> WuunderUtils.Strings.clean(" well    this is a sentence")
       "well this is a sentence"
 
   """
@@ -137,10 +137,10 @@ defmodule WuunderUtils.String do
 
   ## Examples
 
-      iex> WuunderUtils.String.as_string("this is a string")
+      iex> WuunderUtils.Strings.as_string("this is a string")
       "this is a string"
 
-      iex> WuunderUtils.String.as_string(%{a: 10})
+      iex> WuunderUtils.Strings.as_string(%{a: 10})
       "%{a: 10}"
 
   """
@@ -155,10 +155,10 @@ defmodule WuunderUtils.String do
 
   ## Examples
 
-      iex> WuunderUtils.String.truncate("this is a long string", 30)
+      iex> WuunderUtils.Strings.truncate("this is a long string", 30)
       "this is a long string"
 
-      iex> WuunderUtils.String.truncate("this is a long string", 10)
+      iex> WuunderUtils.Strings.truncate("this is a long string", 10)
       "this is ..."
   """
   @spec truncate(String.t(), integer()) :: String.t()

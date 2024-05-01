@@ -1,4 +1,4 @@
-defmodule WuunderUtils.ResultTest do
+defmodule WuunderUtils.ResultsTest do
   use ExUnit.Case
 
   defmodule Shipment do
@@ -9,5 +9,5 @@ defmodule WuunderUtils.ResultTest do
     end
   end
 
-  doctest WuunderUtils.Result
+  doctest WuunderUtils.Results
 end
