@@ -113,6 +113,26 @@ defmodule WuunderUtils.Strings do
   end
 
   @doc """
+  Ensures that given value gets converted to empty string when
+  given value is nil. In all other cases, it will just pass along the string.
+
+  ## Examples
+
+      iex> WuunderUtils.Strings.not_nil(nil)
+      ""
+
+      iex> WuunderUtils.Strings.not_nil("")
+      ""
+
+      iex> WuunderUtils.Strings.not_nil("value")
+      "value"
+
+  """
+  @spec not_nil(nil | String.t()) :: String.t()
+  def not_nil(nil), do: ""
+  def not_nil(value) when is_binary(value), do: value
+
+  @doc """
   Trims and cleans up double spaces. Converts `nil` to empty string.
 
   ## Examples
