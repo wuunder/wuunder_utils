@@ -136,6 +136,109 @@ defmodule WuunderUtils.Maps do
   def get_field_in(nil, keys) when is_list(keys), do: nil
 
   @doc """
+  Creates a map from a given set of fields. The output will always be a string.
+
+  ## Examples
+
+      iex> person = %Person{
+      ...>   country: %Country{code: "NL"},
+      ...>   address: %Address{
+      ...>     street: "Teststreet",
+      ...>     company: %Company{name: "Wuunder"}
+      ...>   },
+      ...>   meta: %{
+      ...>     skills: [
+      ...>       "programmer",
+      ...>       "manager",
+      ...>       %{type: "hobby", name: "painting"}
+      ...>     ]
+      ...>   }
+      ...> }
+      ...>
+      ...> WuunderUtils.Maps.get_fields_in(
+      ...>   person,
+      ...>   [
+      ...>     [:country, :code],
+      ...>     [:address, :street],
+      ...>     [:meta, :skills, 2, :type]
+      ...>   ]
+      ...> )
+      %{
+        "address" => %{"street" => "Teststreet"},
+        "country" => %{"code" => "NL"},
+        "meta" => %{
+          "skills" => [
+            %{"type" => "hobby"}
+          ]
+        }
+      }
+
+  """
+  @spec get_fields_in(map() | struct() | list(), list()) :: map()
+  def get_fields_in(value, fields) do
+    initial_map =
+      Enum.reduce(fields, %{}, fn field, initial_map ->
+        keys =
+          field
+          |> get_keys()
+          |> ensure_zero_index()
+
+        Map.merge(initial_map, empty_map(keys))
+      end)
+
+    Enum.reduce(fields, initial_map, fn field, final_map ->
+      value = get_field_in(value, field)
+
+      keys =
+        field
+        |> get_keys()
+        |> ensure_zero_index()
+
+      put_field_in(final_map, keys, value)
+    end)
+  end
+
+  @doc """
+  Generates an empty map and list from a given set of keys
+
+  ## Examples
+
+      iex> WuunderUtils.Maps.empty_map([:person, :name, :meta, 0, :hobby, :type])
+      %{"person" => %{"name" => %{"meta" => [%{"hobby" => %{"type" => %{}}}]}}}
+
+      iex> WuunderUtils.Maps.empty_map([:person, :name, :meta, 0, :hobbies, 0, :type])
+      %{"person" => %{"name" => %{"meta" => [%{"hobbies" => [%{"type" => %{}}]}]}}}
+
+  """
+  @spec empty_map(String.t() | list()) :: map()
+  def empty_map(path) when is_binary(path) do
+    path
+    |> keys_from_path()
+    |> empty_map()
+  end
+
+  def empty_map(keys) when is_list(keys), do: empty_map(%{}, keys)
+
+  @spec empty_map(map() | list(), list()) :: map() | list()
+  def empty_map(list, [key | rest]) when is_list(list) do
+    if is_integer(key) do
+      [empty_map(rest)]
+    else
+      [%{"key" => empty_map(rest)}]
+    end
+  end
+
+  def empty_map(map, [key | rest]) when is_map(map) do
+    if is_integer(key) do
+      [empty_map(rest)]
+    else
+      Map.put(map, "#{key}", empty_map(rest))
+    end
+  end
+
+  def empty_map(map_or_list, []), do: map_or_list
+
+  @doc """
   Acts as an IndifferentMap. Put a key/value regardless of the key type. If the map
   contains keys as atoms, the value will be stored as atom: value. If the map contains
   strings as keys it will store the value as binary: value
@@ -734,6 +837,24 @@ defmodule WuunderUtils.Maps do
     |> Enum.map(fn key ->
       if key =~ ~r/^[0-9]+$/ do
         String.to_integer(key)
+      else
+        key
+      end
+    end)
+  end
+
+  defp get_keys(field) do
+    if is_binary(field) do
+      keys_from_path(field)
+    else
+      field
+    end
+  end
+
+  defp ensure_zero_index(keys) do
+    Enum.map(keys, fn key ->
+      if is_integer(key) do
+        0
       else
         key
       end
