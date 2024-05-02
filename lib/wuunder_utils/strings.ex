@@ -145,8 +145,8 @@ defmodule WuunderUtils.Strings do
 
   """
   @spec as_string(any()) :: String.t()
-  def as_string(value) when is_binary(value), do: truncate(value, 255)
-  def as_string(value), do: as_string(inspect(value))
+  def as_string(value) when is_binary(value), do: value
+  def as_string(value), do: inspect(value)
 
   @doc """
   Truncates a string with a given string. If string is longer than
