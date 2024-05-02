@@ -116,16 +116,7 @@ defmodule WuunderUtils.Maps do
   """
   @spec get_field_in(map() | struct() | nil, list(atom()) | String.t()) :: any()
   def get_field_in(value, path) when is_binary(path) do
-    keys =
-      path
-      |> String.split(".")
-      |> Enum.map(fn key ->
-        if key =~ ~r/^[0-9]+$/ do
-          String.to_integer(key)
-        else
-          key
-        end
-      end)
+    keys = keys_from_path(path)
 
     get_field_in(value, keys)
   end
@@ -154,6 +145,12 @@ defmodule WuunderUtils.Maps do
       iex> WuunderUtils.Maps.put_field(%{value: 20}, :weight, 350)
       %{value: 20, weight: 350}
 
+      iex> WuunderUtils.Maps.put_field(["a", "b", "c"], 1, "d")
+      ["a", "d", "c"]
+
+      iex> WuunderUtils.Maps.put_field(["a", "b", "c"], 4, "d")
+      ["a", "b", "c"]
+
       iex> WuunderUtils.Maps.put_field(%{value: 20, weight: 200}, "weight", 350)
       %{value: 20, weight: 350}
 
@@ -167,7 +164,7 @@ defmodule WuunderUtils.Maps do
       %{"weight" => 350, "value" => 25}
 
   """
-  @spec put_field(map(), map_key(), any()) :: map()
+  @spec put_field(map() | struct() | nil, list(atom()) | String.t(), any()) :: any()
   def put_field(map, key, value)
       when is_map(map) and is_valid_map_atom_key(key) do
     if Map.has_key?(map, key) || has_only_atom_keys?(map) do
@@ -175,6 +172,10 @@ defmodule WuunderUtils.Maps do
     else
       Map.put(map, "#{key}", value)
     end
+  end
+
+  def put_field(list, index, value) when is_list(list) and is_integer(index) do
+    List.replace_at(list, index, value)
   end
 
   def put_field(map, key, value) when is_map(map) and is_valid_map_binary_key(key) do
@@ -186,6 +187,57 @@ defmodule WuunderUtils.Maps do
       Map.put(map, key, value)
     end
   end
+
+  @doc """
+  Acts as Kernel.put-in but can also be used on Structs.
+  Has a lot of more extra functionalities:
+  - You can access lists (nested too)
+  - You can use mixed keys, they can be Atoms or Strings
+  - You can use a list to access the properties or a string representation
+
+  ## Examples
+
+      iex> person = %Person{
+      ...>   country: %Country{code: "NL"},
+      ...>   address: %Address{
+      ...>     street: "Teststreet",
+      ...>     company: %Company{name: "Wuunder"}
+      ...>   },
+      ...>   meta: %{
+      ...>     skills: [
+      ...>       "programmer",
+      ...>       "manager",
+      ...>       %{type: "hobby", name: "painting"}
+      ...>     ]
+      ...>   }
+      ...> }
+      iex> WuunderUtils.Maps.put_field_in(person, [:first_name], "Piet")
+      %Person{person | first_name: "Piet"}
+      iex> WuunderUtils.Maps.put_field_in(person, [:country, :code], "US")
+      %Person{person | country: %Country{code: "US"}}
+      iex> WuunderUtils.Maps.put_field_in(person, [:meta, :skills, 1], "vaultdweller")
+      %Person{person | meta: %{skills: ["programmer", "vaultdweller", %{name: "painting", type: "hobby"}]}}
+      iex> WuunderUtils.Maps.put_field_in(person, [:meta, :skills, 2, :name], "walking")
+      %Person{person | meta: %{skills: ["programmer", "manager", %{name: "walking", type: "hobby"}]}}
+      iex> WuunderUtils.Maps.put_field_in(person, "meta.skills.2.name", "walking")
+      %Person{person | meta: %{skills: ["programmer", "manager", %{name: "walking", type: "hobby"}]}}
+
+  """
+  @spec put_field_in(map() | struct() | nil, list(atom()) | String.t(), any()) :: any()
+  def put_field_in(value, path, value_to_set)
+      when (is_map(value) or is_list(value)) and is_binary(path) do
+    keys = keys_from_path(path)
+
+    put_field_in(value, keys, value_to_set)
+  end
+
+  def put_field_in(map_or_list, [key | rest], value_to_set)
+      when is_map(map_or_list) or is_list(map_or_list) do
+    current = get_field(map_or_list, key)
+    put_field(map_or_list, key, put_field_in(current, rest, value_to_set))
+  end
+
+  def put_field_in(_map_or_list, [], value_to_set), do: value_to_set
 
   @doc """
   Removes a key from a map. Doesn't matter if the key is an atom or string
@@ -674,5 +726,17 @@ defmodule WuunderUtils.Maps do
     rescue
       ArgumentError -> key
     end
+  end
+
+  defp keys_from_path(path) do
+    path
+    |> String.split(".")
+    |> Enum.map(fn key ->
+      if key =~ ~r/^[0-9]+$/ do
+        String.to_integer(key)
+      else
+        key
+      end
+    end)
   end
 end
