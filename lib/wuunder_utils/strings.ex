@@ -167,14 +167,29 @@ defmodule WuunderUtils.Strings do
       iex> WuunderUtils.Strings.truncate("this is a long string", 10)
       "this is..."
 
+      iex> WuunderUtils.Strings.truncate("this is a long string", 20, "... data truncated")
+      "th... data truncated"
+
+      iex> WuunderUtils.Strings.truncate("this is a long string", 21, "... data truncated")
+      "this is a long string"
+
+      iex> WuunderUtils.Strings.truncate("this is a long string", 10, "very long suffix")
+      "very long "
+
   """
-  @spec truncate(String.t(), integer()) :: String.t()
-  def truncate(value, max_length)
-      when is_binary(value) and is_integer(max_length) and max_length > 3 do
-    if String.length(value) > max_length do
-      String.slice(value, 0..(max_length - 4)) <> "..."
+  @spec truncate(String.t(), integer(), String.t()) :: String.t()
+  def truncate(value, max_length, suffix \\ "...")
+      when is_binary(value) and is_integer(max_length) and max_length > 1 and is_binary(suffix) do
+    if max_length >= String.length(suffix) do
+      suffix_length = String.length(suffix)
+
+      if String.length(value) > max_length do
+        String.slice(value, 0..(max_length - suffix_length - 1)) <> suffix
+      else
+        value
+      end
     else
-      value
+      truncate(suffix, max_length, "")
     end
   end
 end
