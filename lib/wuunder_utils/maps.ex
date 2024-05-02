@@ -12,8 +12,7 @@ defmodule WuunderUtils.Maps do
 
   @doc """
   Retrieves a key from a map regardless of the key type (atom/string)
-  Note that this function does not try to convert a given string key to an atom
-  to prevent an atom overload.
+  Note: This function does not generate new atoms on the fly.
 
   ## Examples
 
@@ -24,7 +23,7 @@ defmodule WuunderUtils.Maps do
       20
 
       iex> WuunderUtils.Maps.get_field(%{value: 20}, "value")
-      nil
+      20
 
       iex> WuunderUtils.Maps.get_field(%{value: 20}, "non-existent")
       nil
@@ -38,38 +37,124 @@ defmodule WuunderUtils.Maps do
       iex> WuunderUtils.Maps.get_field(%{value: 20}, "currency", "EUR")
       "EUR"
 
+      iex> WuunderUtils.Maps.get_field(["a", "b", "c"], 1)
+      "b"
+
+      iex> WuunderUtils.Maps.get_field(["a", "b", "c"], 3, "d")
+      "d"
+
   """
-  @spec get_field(map(), map_key(), any()) :: any()
-  def get_field(params, key, default \\ nil)
+  @spec get_field(map() | list(), map_key() | non_neg_integer(), any()) :: any()
+  def get_field(map, key, default \\ nil)
 
-  def get_field(params, key, default)
-      when is_map(params) and is_valid_map_atom_key(key) do
-    if Map.has_key?(params, key) do
-      Map.get(params, key, default)
+  def get_field(map, index, default) when is_list(map) and is_number(index) do
+    Enum.at(map, index, default)
+  end
+
+  def get_field(map, key, default)
+      when is_map(map) and is_valid_map_atom_key(key) do
+    if Map.has_key?(map, key) do
+      Map.get(map, key)
     else
-      Map.get(params, "#{key}", default)
+      Map.get(map, "#{key}", default)
     end
   end
 
-  def get_field(params, key, default) when is_map(params) and is_valid_map_binary_key(key) do
-    if Map.has_key?(params, key) do
-      Map.get(params, key, default)
+  def get_field(map, key, default) when is_map(map) and is_valid_map_binary_key(key) do
+    atom_key = get_safe_key(key)
+
+    if is_atom(atom_key) && Map.has_key?(map, atom_key) do
+      Map.get(map, atom_key)
     else
-      default
+      Map.get(map, key, default)
     end
   end
+
+  @doc """
+  Acts as Kernel.get_in but can also be used on Structs.
+  Has a lot of more extra functionalities:
+  - You can access lists (nested too)
+  - You can use mixed keys, they can be Atoms or Strings
+  - You can use a list to access the properties or a string representation
+
+  ## Examples
+
+      iex> person = %Person{
+      ...>   country: %Country{code: "NL"},
+      ...>   address: %Address{
+      ...>     street: "Teststreet",
+      ...>     company: %Company{name: "Wuunder"}
+      ...>   },
+      ...>   meta: %{
+      ...>     skills: [
+      ...>       "programmer",
+      ...>       "manager",
+      ...>       %{type: "hobby", name: "painting"}
+      ...>     ]
+      ...>   }
+      ...> }
+      ...>
+      ...> WuunderUtils.Maps.get_field_in(person, [:country, :code])
+      "NL"
+      iex> WuunderUtils.Maps.get_field_in(person, "country.code")
+      "NL"
+      iex> WuunderUtils.Maps.get_field_in(person, [:address, :company])
+      %Company{name: "Wuunder"}
+      iex> WuunderUtils.Maps.get_field_in(person, [:address, :company, :name])
+      "Wuunder"
+      iex> WuunderUtils.Maps.get_field_in(person, [:meta, :skills])
+      ["programmer", "manager", %{name: "painting", type: "hobby"}]
+      iex> WuunderUtils.Maps.get_field_in(person, [:meta, :skills, 1])
+      "manager"
+      iex> WuunderUtils.Maps.get_field_in(person, "meta.skills.1")
+      "manager"
+      iex> WuunderUtils.Maps.get_field_in(person, [:meta, :skills, 2, :type])
+      "hobby"
+      iex> WuunderUtils.Maps.get_field_in(person, "meta.skills.2.type")
+      "hobby"
+
+  """
+  @spec get_field_in(map() | struct() | nil, list(atom()) | String.t()) :: any()
+  def get_field_in(value, path) when is_binary(path) do
+    keys =
+      path
+      |> String.split(".")
+      |> Enum.map(fn key ->
+        if key =~ ~r/^[0-9]+$/ do
+          String.to_integer(key)
+        else
+          key
+        end
+      end)
+
+    get_field_in(value, keys)
+  end
+
+  def get_field_in(nil, _keys), do: nil
+
+  def get_field_in(value, []), do: value
+
+  def get_field_in(value, _keys) when not is_map(value) and not is_list(value), do: nil
+
+  def get_field_in(map_or_list, [key | rest]) when is_map(map_or_list) or is_list(map_or_list) do
+    map_or_list
+    |> get_field(key)
+    |> get_field_in(rest)
+  end
+
+  def get_field_in(nil, keys) when is_list(keys), do: nil
 
   @doc """
   Acts as an IndifferentMap. Put a key/value regardless of the key type. If the map
   contains keys as atoms, the value will be stored as atom: value. If the map contains
   strings as keys it will store the value as binary: value
 
-  Note that this will not try to convert the given string key to an atom if
-  the map contains only atom keys (the same reason as stated in helper function `get_field`)
-
   ## Examples
 
       iex> WuunderUtils.Maps.put_field(%{value: 20}, :weight, 350)
+      %{value: 20, weight: 350}
+
+      iex> WuunderUtils.Maps.put_field(%{value: 20, weight: 200}, "weight", 350)
       %{value: 20, weight: 350}
 
       iex> WuunderUtils.Maps.put_field(%{value: 20}, "weight", 350)
@@ -83,17 +168,24 @@ defmodule WuunderUtils.Maps do
 
   """
   @spec put_field(map(), map_key(), any()) :: map()
-  def put_field(params, key, value)
-      when is_map(params) and is_valid_map_atom_key(key) do
-    if has_only_atom_keys?(params) do
-      Map.put(params, key, value)
+  def put_field(map, key, value)
+      when is_map(map) and is_valid_map_atom_key(key) do
+    if Map.has_key?(map, key) || has_only_atom_keys?(map) do
+      Map.put(map, key, value)
     else
-      Map.put(params, "#{key}", value)
+      Map.put(map, "#{key}", value)
     end
   end
 
-  def put_field(params, key, value) when is_map(params) and is_valid_map_binary_key(key),
-    do: Map.put(params, key, value)
+  def put_field(map, key, value) when is_map(map) and is_valid_map_binary_key(key) do
+    atom_key = get_safe_key(key)
+
+    if Map.has_key?(map, atom_key) do
+      Map.put(map, atom_key, value)
+    else
+      Map.put(map, key, value)
+    end
+  end
 
   @doc """
   Removes a key from a map. Doesn't matter if the key is an atom or string
@@ -104,7 +196,7 @@ defmodule WuunderUtils.Maps do
       %{weight: 100}
 
       iex> WuunderUtils.Maps.delete_field(%{length: 255, weight: 100}, "length")
-      %{weight: 100, length: 255}
+      %{weight: 100}
 
       iex> WuunderUtils.Maps.delete_field(%{"value" => 50, "currency" => "EUR"}, "currency")
       %{"value" => 50}
@@ -114,16 +206,23 @@ defmodule WuunderUtils.Maps do
 
   """
   @spec delete_field(map(), map_key()) :: map
-  def delete_field(params, key) when is_map(params) and is_valid_map_atom_key(key) do
-    if has_only_atom_keys?(params) do
-      Map.delete(params, key)
+  def delete_field(map, key) when is_map(map) and is_valid_map_atom_key(key) do
+    if has_only_atom_keys?(map) do
+      Map.delete(map, key)
     else
-      Map.delete(params, "#{key}")
+      Map.delete(map, "#{key}")
     end
   end
 
-  def delete_field(params, key) when is_map(params) and is_valid_map_binary_key(key),
-    do: Map.delete(params, key)
+  def delete_field(map, key) when is_map(map) and is_valid_map_binary_key(key) do
+    atom_key = get_safe_key(key)
+
+    if Map.has_key?(map, atom_key) do
+      Map.delete(map, atom_key)
+    else
+      Map.delete(map, key)
+    end
+  end
 
   @doc """
   Tests if the given map only consists of atom keys
@@ -143,14 +242,14 @@ defmodule WuunderUtils.Maps do
   @spec has_only_atom_keys?(map() | struct()) :: boolean()
   def has_only_atom_keys?(struct) when is_struct(struct), do: true
 
-  def has_only_atom_keys?(params) when is_map(params) do
-    params
+  def has_only_atom_keys?(map) when is_map(map) do
+    map
     |> Map.keys()
     |> Enum.all?(&is_atom/1)
   end
 
   @doc """
-  Maps a given field from given (if not in params)
+  Maps a given field from given (if not in map)
 
   ## Examples
 
@@ -165,17 +264,17 @@ defmodule WuunderUtils.Maps do
 
   """
   @spec alias_field(map(), atom(), atom()) :: map()
-  def alias_field(params, from, to)
-      when is_map(params) and is_valid_map_atom_key(from) and is_valid_map_atom_key(to) do
-    from_key = if Enum.empty?(params) || has_only_atom_keys?(params), do: from, else: "#{from}"
-    to_key = if Enum.empty?(params) || has_only_atom_keys?(params), do: to, else: "#{to}"
+  def alias_field(map, from, to)
+      when is_map(map) and is_valid_map_atom_key(from) and is_valid_map_atom_key(to) do
+    from_key = if Enum.empty?(map) || has_only_atom_keys?(map), do: from, else: "#{from}"
+    to_key = if Enum.empty?(map) || has_only_atom_keys?(map), do: to, else: "#{to}"
 
-    if is_nil(Map.get(params, from_key)) == false && is_nil(Map.get(params, to_key)) do
-      params
-      |> Map.put(to_key, Map.get(params, from_key))
+    if is_nil(Map.get(map, from_key)) == false && is_nil(Map.get(map, to_key)) do
+      map
+      |> Map.put(to_key, Map.get(map, from_key))
       |> Map.delete(from_key)
     else
-      Map.delete(params, from_key)
+      Map.delete(map, from_key)
     end
   end
 
@@ -189,9 +288,9 @@ defmodule WuunderUtils.Maps do
 
   """
   @spec alias_fields(map(), map()) :: map()
-  def alias_fields(params, aliasses),
+  def alias_fields(map, aliasses),
     do:
-      Enum.reduce(Map.keys(aliasses), params, fn key, alias_params ->
+      Enum.reduce(Map.keys(aliasses), map, fn key, alias_params ->
         alias_field(alias_params, key, Map.get(aliasses, key))
       end)
 
@@ -208,12 +307,12 @@ defmodule WuunderUtils.Maps do
 
   ## Examples
 
-      iex> WuunderUtils.Maps.from_struct(%TestStruct{
+      iex> WuunderUtils.Maps.from_struct(%Person{
       ...>   first_name: "Peter",
       ...>   last_name: "Pan",
       ...>   date_of_birth: ~D[1980-01-02],
       ...>   weight: Decimal.new("81.5"),
-      ...>   country: %TestStruct2{code: "UK"},
+      ...>   country: %{code: "UK"},
       ...>   time_of_death: ~T[13:37:37]
       ...> })
       %{
@@ -223,19 +322,20 @@ defmodule WuunderUtils.Maps do
         last_name: "Pan",
         time_of_death: "13:37:37",
         weight: "81.5",
-        country: %{code: "UK"}
+        country: %{code: "UK"},
+        meta: %{}
       }
 
       iex> WuunderUtils.Maps.from_struct(
-      ...>   %TestStruct{
+      ...>   %Person{
       ...>     first_name: "Peter",
       ...>     last_name: "Pan",
       ...>     date_of_birth: ~D[1980-01-02],
       ...>     weight: Decimal.new("81.5"),
-      ...>     country: %TestStruct2{code: "UK"},
+      ...>     country: %Country{code: "UK"},
       ...>     time_of_death: ~T[13:37:37]
       ...>   },
-      ...>   transform: [{TestStruct2, fn x -> "COUNTRY:" <> x.code end}]
+      ...>   transform: [{Country, fn x -> "COUNTRY:" <> x.code end}]
       ...> )
       %{
         address: nil,
@@ -244,12 +344,13 @@ defmodule WuunderUtils.Maps do
         last_name: "Pan",
         time_of_death: "13:37:37",
         weight: "81.5",
-        country: "COUNTRY:UK"
+        country: "COUNTRY:UK",
+        meta: %{}
       }
 
       iex> WuunderUtils.Maps.from_struct(
-      ...>   %TestStruct{
-      ...>     address: %TestSchema{
+      ...>   %Person{
+      ...>     address: %Address{
       ...>       street: "Straat",
       ...>       number: 13,
       ...>       zipcode: "1122AB"
@@ -258,18 +359,19 @@ defmodule WuunderUtils.Maps do
       ...>     last_name: "Pan",
       ...>     date_of_birth: ~D[1980-01-02],
       ...>     weight: Decimal.new("81.5"),
-      ...>     country: %TestStruct2{code: "UK"},
+      ...>     country: %{code: "UK"},
       ...>     time_of_death: ~T[13:37:37]
       ...>   }
       ...> )
       %{
-        address: %{number: 13, street: "Straat", zipcode: "1122AB"},
+        address: %{company: nil, number: 13, street: "Straat", zipcode: "1122AB"},
         date_of_birth: "1980-01-02",
         first_name: "Peter",
         last_name: "Pan",
         time_of_death: "13:37:37",
         weight: "81.5",
-        country: %{code: "UK"}
+        country: %{code: "UK"},
+        meta: %{}
       }
 
   """
@@ -281,14 +383,12 @@ defmodule WuunderUtils.Maps do
     do: from_struct(value, default_struct_transforms() ++ extra_transformers)
 
   def from_struct(%module{} = struct, transform) when is_list(transform) do
-    transform
-    |> Keyword.get(module)
-    |> case do
-      nil ->
-        transform_struct(module, struct, transform)
+    transform_fn = Keyword.get(transform, module)
 
-      fun when is_function(fun, 1) ->
-        fun.(struct)
+    if is_function(transform_fn, 1) do
+      transform_fn.(struct)
+    else
+      transform_struct(module, struct, transform)
     end
   end
 
@@ -320,15 +420,15 @@ defmodule WuunderUtils.Maps do
 
   """
   @spec put_when(map(), function() | boolean(), map_key(), any()) :: map()
-  def put_when(params, condition, key, value)
-      when is_map(params) and is_function(condition) and is_valid_map_key(key),
-      do: put_when(params, !!condition.(), key, value)
+  def put_when(map, condition, key, value)
+      when is_map(map) and is_function(condition) and is_valid_map_key(key),
+      do: put_when(map, !!condition.(), key, value)
 
-  def put_when(params, true, key, value) when is_map(params) and is_valid_map_key(key),
-    do: put_field(params, key, value)
+  def put_when(map, true, key, value) when is_map(map) and is_valid_map_key(key),
+    do: put_field(map, key, value)
 
-  def put_when(params, false, key, _value) when is_map(params) and is_valid_map_key(key),
-    do: params
+  def put_when(map, false, key, _value) when is_map(map) and is_valid_map_key(key),
+    do: map
 
   @doc """
   Only puts value in map when the value is considered empty
@@ -346,8 +446,8 @@ defmodule WuunderUtils.Maps do
 
   """
   @spec put_if_present(map(), map_key(), any()) :: map
-  def put_if_present(params, key, value) when is_map(params) and is_valid_map_key(key),
-    do: put_when(params, Presence.present?(value), key, value)
+  def put_if_present(map, key, value) when is_map(map) and is_valid_map_key(key),
+    do: put_when(map, Presence.present?(value), key, value)
 
   @doc """
   Only puts value in map when value is actually nil (not the same as empty)
@@ -383,7 +483,7 @@ defmodule WuunderUtils.Maps do
       iex> WuunderUtils.Maps.present?(%{a: 1})
       true
 
-      iex> WuunderUtils.Maps.present?(%TestStruct{})
+      iex> WuunderUtils.Maps.present?(%Person{})
       true
 
       iex> WuunderUtils.Maps.present?(%Ecto.Association.NotLoaded{})
@@ -566,5 +666,13 @@ defmodule WuunderUtils.Maps do
       {NaiveDateTime, &to_string/1},
       {Time, &to_string/1}
     ]
+  end
+
+  defp get_safe_key(key) when is_binary(key) do
+    try do
+      String.to_existing_atom(key)
+    rescue
+      ArgumentError -> key
+    end
   end
 end

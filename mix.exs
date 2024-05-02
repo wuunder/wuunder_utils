@@ -4,7 +4,7 @@ defmodule WuunderUtils.MixProject do
   def project do
     [
       app: :wuunder_utils,
-      version: "0.1.1",
+      version: "0.2.1",
       elixir: "~> 1.14",
       organization: "wuunder",
       name: "Wuunder Utils",
