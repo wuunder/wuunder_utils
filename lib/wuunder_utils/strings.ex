@@ -158,14 +158,21 @@ defmodule WuunderUtils.Strings do
       iex> WuunderUtils.Strings.truncate("this is a long string", 30)
       "this is a long string"
 
+      iex> WuunderUtils.Strings.truncate("this is a long string", 21)
+      "this is a long string"
+
+      iex> WuunderUtils.Strings.truncate("this is a long string", 20)
+      "this is a long st..."
+
       iex> WuunderUtils.Strings.truncate("this is a long string", 10)
-      "this is ..."
+      "this is..."
+
   """
   @spec truncate(String.t(), integer()) :: String.t()
   def truncate(value, max_length)
       when is_binary(value) and is_integer(max_length) and max_length > 3 do
-    if String.length(value) > max_length - 3 do
-      String.slice(value, 0..(max_length - 3)) <> "..."
+    if String.length(value) > max_length do
+      String.slice(value, 0..(max_length - 4)) <> "..."
     else
       value
     end
