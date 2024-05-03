@@ -15,6 +15,7 @@ defmodule WuunderUtils.MixProject do
       source_url: "https://github.com/wuunder/wuunder_utils",
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [coveralls: :test, "coveralls.html": :test],
       version: "0.2.6"
     ]
   end
