@@ -25,9 +25,9 @@ defmodule WuunderUtils.Results do
 
   """
   @spec all_ok?(term()) :: boolean()
-  def all_ok?(results) when is_list(results), do: Enum.all?(results, &is_ok?/1)
+  def all_ok?(results) when is_list(results), do: Enum.all?(results, &ok?/1)
 
-  def all_ok?(results), do: is_ok?(results)
+  def all_ok?(results), do: ok?(results)
 
   @doc """
   Checks if all results errored
@@ -51,9 +51,9 @@ defmodule WuunderUtils.Results do
 
   """
   @spec all_error?(term()) :: boolean()
-  def all_error?(results) when is_list(results), do: Enum.all?(results, &is_error?/1)
+  def all_error?(results) when is_list(results), do: Enum.all?(results, &error?/1)
 
-  def all_error?(results), do: is_error?(results)
+  def all_error?(results), do: error?(results)
 
   @doc """
   Checks if there any OKs in the value. Could be a list or a single value.
@@ -74,9 +74,9 @@ defmodule WuunderUtils.Results do
 
   """
   @spec has_ok?(term()) :: boolean()
-  def has_ok?(results) when is_list(results), do: Enum.any?(results, &is_ok?/1)
+  def has_ok?(results) when is_list(results), do: Enum.any?(results, &ok?/1)
 
-  def has_ok?(results), do: is_ok?(results)
+  def has_ok?(results), do: ok?(results)
 
   @doc """
   Checks if any items in the list contains an error
@@ -102,9 +102,9 @@ defmodule WuunderUtils.Results do
 
   """
   @spec has_error?(term()) :: boolean()
-  def has_error?(results) when is_list(results), do: Enum.any?(results, &is_error?/1)
+  def has_error?(results) when is_list(results), do: Enum.any?(results, &error?/1)
 
-  def has_error?(results), do: is_error?(results)
+  def has_error?(results), do: error?(results)
 
   @doc """
   Retrieves the first occurence of an error tuple in the result list
@@ -129,7 +129,7 @@ defmodule WuunderUtils.Results do
       |> List.first()
 
   def get_error(result) do
-    if is_error?(result) do
+    if error?(result) do
       get_result_value(result)
     else
       nil
@@ -156,7 +156,7 @@ defmodule WuunderUtils.Results do
   def get_errors(results) when is_list(results),
     do:
       results
-      |> Enum.filter(&is_error?/1)
+      |> Enum.filter(&error?/1)
       |> Enum.map(&get_error/1)
 
   def get_errors(result), do: get_errors([result])
@@ -232,7 +232,7 @@ defmodule WuunderUtils.Results do
       |> List.first()
 
   def get_ok(result) do
-    if is_ok?(result) do
+    if ok?(result) do
       get_result_value(result)
     else
       nil
@@ -259,7 +259,7 @@ defmodule WuunderUtils.Results do
   def get_oks(results) when is_list(results),
     do:
       results
-      |> Enum.filter(&is_ok?/1)
+      |> Enum.filter(&ok?/1)
       |> Enum.map(&get_ok/1)
 
   def get_oks(result), do: get_oks([result])
@@ -391,7 +391,7 @@ defmodule WuunderUtils.Results do
       |> List.first()
 
   def get_success(result) do
-    if is_success?(result) do
+    if success?(result) do
       get_result_value(result)
     else
       nil
@@ -419,7 +419,7 @@ defmodule WuunderUtils.Results do
   def get_successes(results) when is_list(results),
     do:
       results
-      |> Enum.filter(&is_success?/1)
+      |> Enum.filter(&success?/1)
       |> Enum.map(&get_success/1)
 
   def get_successes(result), do: get_successes([result])
@@ -429,30 +429,30 @@ defmodule WuunderUtils.Results do
 
   ## Examples
 
-      iex> WuunderUtils.Results.is_ok?({:ok, "value"})
+      iex> WuunderUtils.Results.ok?({:ok, "value"})
       true
 
-      iex> WuunderUtils.Results.is_ok?(:ok)
+      iex> WuunderUtils.Results.ok?(:ok)
       true
 
-      iex> WuunderUtils.Results.is_ok?("some-value")
+      iex> WuunderUtils.Results.ok?("some-value")
       false
 
-      iex> WuunderUtils.Results.is_ok?({:error, "error message"})
+      iex> WuunderUtils.Results.ok?({:error, "error message"})
       false
 
-      iex> WuunderUtils.Results.is_ok?([])
+      iex> WuunderUtils.Results.ok?([])
       false
 
   """
-  @spec is_ok?(any()) :: boolean()
-  def is_ok?(result) when is_tuple(result),
-    do: is_ok?(elem(result, 0))
+  @spec ok?(any()) :: boolean()
+  def ok?(result) when is_tuple(result),
+    do: ok?(elem(result, 0))
 
-  def is_ok?(:ok), do: true
-  def is_ok?(:error), do: false
+  def ok?(:ok), do: true
+  def ok?(:error), do: false
 
-  def is_ok?(_result), do: false
+  def ok?(_result), do: false
 
   @doc """
   Tests if result is a success. Meaning: :ok, {:ok, X} or any other value othen than
@@ -460,72 +460,72 @@ defmodule WuunderUtils.Results do
 
   ## Examples
 
-      iex> WuunderUtils.Results.is_success?({:ok, "value"})
+      iex> WuunderUtils.Results.success?({:ok, "value"})
       true
 
-      iex> WuunderUtils.Results.is_success?([])
+      iex> WuunderUtils.Results.success?([])
       true
 
-      iex> WuunderUtils.Results.is_success?(nil)
+      iex> WuunderUtils.Results.success?(nil)
       true
 
-      iex> WuunderUtils.Results.is_success?({:error, "error message"})
+      iex> WuunderUtils.Results.success?({:error, "error message"})
       false
 
   """
-  @spec is_success?(any()) :: boolean()
-  def is_success?(result) when is_tuple(result), do: is_success?(elem(result, 0))
+  @spec success?(any()) :: boolean()
+  def success?(result) when is_tuple(result), do: success?(elem(result, 0))
 
-  def is_success?(:ok), do: true
-  def is_success?(:error), do: false
+  def success?(:ok), do: true
+  def success?(:error), do: false
 
-  def is_success?(_result), do: true
+  def success?(_result), do: true
 
   @doc """
   Tests if result contains an error
 
   ## Examples
 
-      iex> WuunderUtils.Results.is_error?({:error, "error message"})
+      iex> WuunderUtils.Results.error?({:error, "error message"})
       true
 
-      iex> WuunderUtils.Results.is_error?({:ok, "value"})
+      iex> WuunderUtils.Results.error?({:ok, "value"})
       false
 
-      iex> WuunderUtils.Results.is_error?([])
+      iex> WuunderUtils.Results.error?([])
       false
 
   """
-  @spec is_error?(any()) :: boolean()
-  def is_error?(result) when is_tuple(result),
-    do: is_error?(elem(result, 0))
+  @spec error?(any()) :: boolean()
+  def error?(result) when is_tuple(result),
+    do: error?(elem(result, 0))
 
-  def is_error?(:error), do: true
-  def is_error?(_result), do: false
+  def error?(:error), do: true
+  def error?(_result), do: false
 
   @doc """
   Checks if given value is :ok, :error or {:ok, _} or {:error, _}
 
   ## Examples
 
-      iex> WuunderUtils.Results.is_result?({:ok, "value"})
+      iex> WuunderUtils.Results.result?({:ok, "value"})
       true
 
-      iex> WuunderUtils.Results.is_result?({:error, "value"})
+      iex> WuunderUtils.Results.result?({:error, "value"})
       true
 
-      iex> WuunderUtils.Results.is_result?(:ok)
+      iex> WuunderUtils.Results.result?(:ok)
       true
 
-      iex> WuunderUtils.Results.is_result?(:error)
+      iex> WuunderUtils.Results.result?(:error)
       true
 
-      iex> WuunderUtils.Results.is_result?("value")
+      iex> WuunderUtils.Results.result?("value")
       false
 
   """
-  @spec is_result?(any()) :: boolean()
-  def is_result?(value), do: not is_nil(get_result_code(value))
+  @spec result?(any()) :: boolean()
+  def result?(value), do: not is_nil(get_result_code(value))
 
   @doc """
   Grabs result code from tuple or value. Valid values are :ok, :error or {:ok, _} or {:error, _}
@@ -589,7 +589,7 @@ defmodule WuunderUtils.Results do
   """
   @spec get_result_value(any()) :: any() | nil
   def get_result_value(value) when is_tuple(value) do
-    if is_result?(value) do
+    if result?(value) do
       values_after_code = Tuple.delete_at(value, 0)
 
       if tuple_size(values_after_code) == 1 do
@@ -603,7 +603,7 @@ defmodule WuunderUtils.Results do
   end
 
   def get_result_value(value) do
-    if is_result?(value) do
+    if result?(value) do
       nil
     else
       value
@@ -634,12 +634,9 @@ defmodule WuunderUtils.Results do
   def get_success_values(values) when is_list(values) do
     values
     |> Enum.reduce([], fn value, acc ->
-      if is_success?(value) do
-        acc ++ [get_result_value(value)]
-      else
-        acc
-      end
+      if success?(value), do: [get_result_value(value) | acc], else: acc
     end)
+    |> Enum.reverse()
   end
 
   def get_success_values(value), do: get_success_values([value])
@@ -647,11 +644,11 @@ defmodule WuunderUtils.Results do
   defp first_ok(results) when is_list(results),
     do:
       results
-      |> Enum.filter(&is_ok?/1)
+      |> Enum.filter(&ok?/1)
       |> List.first()
 
   defp first_ok(value) do
-    if is_ok?(value) do
+    if ok?(value) do
       value
     else
       nil
@@ -661,11 +658,11 @@ defmodule WuunderUtils.Results do
   defp first_error(results) when is_list(results),
     do:
       results
-      |> Enum.filter(&is_error?/1)
+      |> Enum.filter(&error?/1)
       |> List.first()
 
   defp first_error(value) do
-    if is_error?(value) do
+    if error?(value) do
       value
     else
       nil
