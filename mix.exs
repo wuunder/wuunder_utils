@@ -40,7 +40,7 @@ defmodule WuunderUtils.MixProject do
 
   defp package do
     [
-      name: "Wuunder Utils",
+      name: "wuunder_utils",
       files: ~w(lib .formatter.exs mix.exs README*),
       licenses: ["Apache-2.0"],
       links: %{
