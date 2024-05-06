@@ -118,19 +118,19 @@ defmodule WuunderUtils.Strings do
 
   ## Examples
 
-      iex> WuunderUtils.Strings.not_nil(nil)
+      iex> WuunderUtils.Strings.nil_to_string(nil)
       ""
 
-      iex> WuunderUtils.Strings.not_nil("")
+      iex> WuunderUtils.Strings.nil_to_string("")
       ""
 
-      iex> WuunderUtils.Strings.not_nil("value")
+      iex> WuunderUtils.Strings.nil_to_string("value")
       "value"
 
   """
-  @spec not_nil(nil | String.t()) :: String.t()
-  def not_nil(nil), do: ""
-  def not_nil(value) when is_binary(value), do: value
+  @spec nil_to_string(nil | String.t()) :: String.t()
+  def nil_to_string(nil), do: ""
+  def nil_to_string(value) when is_binary(value), do: value
 
   @doc """
   Trims and cleans up double spaces. Converts `nil` to empty string.
