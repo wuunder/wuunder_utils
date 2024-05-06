@@ -39,6 +39,12 @@ defmodule WuunderUtils.Strings do
       iex> WuunderUtils.Strings.capitalize("is this spArTA?")
       "Is This Sparta?"
 
+      iex> WuunderUtils.Strings.capitalize("Michał")
+      "Michał"
+
+      iex> WuunderUtils.Strings.capitalize("łukasz")
+      "Łukasz"
+
   """
   @spec capitalize(String.t()) :: String.t()
   def capitalize(string) when is_binary(string) do
