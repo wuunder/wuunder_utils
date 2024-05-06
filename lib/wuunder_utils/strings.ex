@@ -137,16 +137,19 @@ defmodule WuunderUtils.Strings do
 
   ## Examples
 
-      iex> WuunderUtils.Strings.as_string("this is a string")
+      iex> WuunderUtils.Strings.inspect_value("this is a string")
       "this is a string"
 
-      iex> WuunderUtils.Strings.as_string(%{a: 10})
+      iex> "This is " <> WuunderUtils.Strings.inspect_value("a string")
+      "This is a string"
+
+      iex> WuunderUtils.Strings.inspect_value(%{a: 10})
       "%{a: 10}"
 
   """
-  @spec as_string(any()) :: String.t()
-  def as_string(value) when is_binary(value), do: value
-  def as_string(value), do: inspect(value)
+  @spec inspect_value(any()) :: String.t()
+  def inspect_value(value) when is_binary(value), do: value
+  def inspect_value(value), do: inspect(value)
 
   @doc """
   Truncates a string with a given string. If string is longer than
