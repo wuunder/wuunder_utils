@@ -602,7 +602,7 @@ defmodule WuunderUtils.Maps do
   """
   @spec put_if_present(map(), map_key(), any()) :: map
   def put_if_present(map, key, value) when is_map(map) and is_valid_map_key(key),
-    do: put_when(map, Presence.present?(value), key, value)
+    do: put_when(map, Presence.any?(value), key, value)
 
   @doc """
   Only puts value in map when value is actually nil (not the same as empty)
@@ -629,27 +629,27 @@ defmodule WuunderUtils.Maps do
 
   ## Examples
 
-      iex> WuunderUtils.Maps.present?(nil)
+      iex> WuunderUtils.Maps.any?(nil)
       false
 
-      iex> WuunderUtils.Maps.present?(%{})
+      iex> WuunderUtils.Maps.any?(%{})
       false
 
-      iex> WuunderUtils.Maps.present?(%{a: 1})
+      iex> WuunderUtils.Maps.any?(%{a: 1})
       true
 
-      iex> WuunderUtils.Maps.present?(%Person{})
+      iex> WuunderUtils.Maps.any?(%Person{})
       true
 
-      iex> WuunderUtils.Maps.present?(%Ecto.Association.NotLoaded{})
+      iex> WuunderUtils.Maps.any?(%Ecto.Association.NotLoaded{})
       false
 
   """
-  @spec present?(Ecto.Association.NotLoaded.t() | nil | map()) :: boolean()
-  def present?(%Ecto.Association.NotLoaded{}), do: false
-  def present?(nil), do: false
-  def present?(value) when is_map(value) and map_size(value) == 0, do: false
-  def present?(value) when is_map(value) and map_size(value) > 0, do: true
+  @spec any?(Ecto.Association.NotLoaded.t() | nil | map()) :: boolean()
+  def any?(%Ecto.Association.NotLoaded{}), do: false
+  def any?(nil), do: false
+  def any?(value) when is_map(value) and map_size(value) == 0, do: false
+  def any?(value) when is_map(value) and map_size(value) > 0, do: true
 
   @doc """
   Flattens a map. This results in a map that just contains one level

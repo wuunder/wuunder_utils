@@ -57,18 +57,18 @@ defmodule WuunderUtils.Strings do
 
   ## Examples
 
-      iex> WuunderUtils.Strings.present?("   ")
+      iex> WuunderUtils.Strings.any?("   ")
       false
 
-      iex> WuunderUtils.Strings.present?(nil)
+      iex> WuunderUtils.Strings.any?(nil)
       false
 
-      iex> WuunderUtils.Strings.present?("yes")
+      iex> WuunderUtils.Strings.any?("yes")
       true
 
   """
-  @spec present?(String.t() | nil) :: boolean()
-  def present?(string) when is_binary(string) or is_nil(string), do: not empty?(string)
+  @spec any?(String.t() | nil) :: boolean()
+  def any?(string) when is_binary(string) or is_nil(string), do: not empty?(string)
 
   @doc """
   Converts an empty string to nil or returns the original string

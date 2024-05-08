@@ -1,6 +1,6 @@
 defmodule WuunderUtils.Presence do
   @moduledoc """
-  Acts as proxy module towards present? functions of String and Map
+  Acts as proxy module towards any? functions of String and Map
   """
   alias WuunderUtils.Numbers
   alias WuunderUtils.Strings
@@ -22,31 +22,31 @@ defmodule WuunderUtils.Presence do
 
   ## Examples
 
-      iex> WuunderUtils.Presence.present?(nil)
+      iex> WuunderUtils.Presence.any?(nil)
       false
 
-      iex> WuunderUtils.Presence.present?(%{})
+      iex> WuunderUtils.Presence.any?(%{})
       false
 
-      iex> WuunderUtils.Presence.present?(%{value: 1200})
+      iex> WuunderUtils.Presence.any?(%{value: 1200})
       true
 
-      iex> WuunderUtils.Presence.present?("")
+      iex> WuunderUtils.Presence.any?("")
       false
 
-      iex> WuunderUtils.Presence.present?("test")
+      iex> WuunderUtils.Presence.any?("test")
       true
 
   """
-  @spec present?(t()) :: boolean()
-  def present?(value) when is_number(value) or is_decimal(value), do: Numbers.present?(value)
-  def present?(map) when is_map(map), do: Maps.present?(map)
-  def present?(value) when is_binary(value) or is_nil(value), do: Strings.present?(value)
-  def present?([]), do: false
-  def present?([_head | _tail]), do: true
+  @spec any?(t()) :: boolean()
+  def any?(value) when is_number(value) or is_decimal(value), do: Numbers.any?(value)
+  def any?(map) when is_map(map), do: Maps.any?(map)
+  def any?(value) when is_binary(value) or is_nil(value), do: Strings.any?(value)
+  def any?([]), do: false
+  def any?([_head | _tail]), do: true
 
   @doc """
-  The inverse of present?
+  The inverse of any?
 
   ## Examples
 
@@ -66,5 +66,5 @@ defmodule WuunderUtils.Presence do
       false
   """
   @spec empty?(t()) :: boolean()
-  def empty?(value), do: present?(value) == false
+  def empty?(value), do: any?(value) == false
 end

@@ -131,39 +131,39 @@ defmodule WuunderUtils.Numbers do
 
   ## Examples
 
-      iex> WuunderUtils.Numbers.present?(-1)
+      iex> WuunderUtils.Numbers.any?(-1)
       true
 
-      iex> WuunderUtils.Numbers.present?(1)
+      iex> WuunderUtils.Numbers.any?(1)
       true
 
-      iex> WuunderUtils.Numbers.present?(Decimal.new("1"))
+      iex> WuunderUtils.Numbers.any?(Decimal.new("1"))
       true
 
-      iex> WuunderUtils.Numbers.present?(0.000001)
+      iex> WuunderUtils.Numbers.any?(0.000001)
       true
 
-      iex> WuunderUtils.Numbers.present?(0.0)
+      iex> WuunderUtils.Numbers.any?(0.0)
       false
 
-      iex> WuunderUtils.Numbers.present?(0)
+      iex> WuunderUtils.Numbers.any?(0)
       false
 
-      iex> WuunderUtils.Numbers.present?(Decimal.new("0"))
+      iex> WuunderUtils.Numbers.any?(Decimal.new("0"))
       false
 
-      iex> WuunderUtils.Numbers.present?(Decimal.new("0.0"))
+      iex> WuunderUtils.Numbers.any?(Decimal.new("0.0"))
       false
   """
-  @spec present?(Decimal.t() | number() | nil) :: boolean()
-  def present?(nil), do: false
-  def present?(decimal) when is_decimal(decimal), do: Decimal.to_float(decimal) != 0.0
-  def present?(value) when is_integer(value), do: value != 0
-  def present?(value) when is_float(value), do: value != 0.0
+  @spec any?(Decimal.t() | number() | nil) :: boolean()
+  def any?(nil), do: false
+  def any?(decimal) when is_decimal(decimal), do: Decimal.to_float(decimal) != 0.0
+  def any?(value) when is_integer(value), do: value != 0
+  def any?(value) when is_float(value), do: value != 0.0
 
   @doc """
-  Reverse of present?
+  Reverse of any?
   """
   @spec empty?(Decimal.t() | number() | nil) :: boolean()
-  def empty?(value), do: not present?(value)
+  def empty?(value), do: not any?(value)
 end
