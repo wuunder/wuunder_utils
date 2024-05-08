@@ -6,28 +6,6 @@ defmodule WuunderUtils.Strings do
   defguard is_empty(string) when string == nil or string == ""
 
   @doc """
-  Tests is given string is an UUID
-
-  ## Examples
-
-      iex> WuunderUtils.Strings.uuid?("")
-      false
-
-      iex> WuunderUtils.Strings.uuid?("39169cb3-03ea")
-      false
-
-      iex> WuunderUtils.Strings.uuid?("39169CB3-03EA-47E5-9B3C-BD4C53E7FE3F")
-      true
-
-      iex> WuunderUtils.Strings.uuid?("39169cb3-03ea-47e5-9b3c-bd4c53e7fe3f")
-      true
-
-  """
-  @spec uuid?(String.t()) :: boolean()
-  def uuid?(uuid) when is_binary(uuid),
-    do: String.match?(uuid, ~r/[\w]{8}-?[\w]{4}-?[\w]{4}-?[\w]{4}-?[\w]{12}/)
-
-  @doc """
   Capitalizes each word in a given string.
   Note that it will downcase the remainders of each word by default.
 
