@@ -267,7 +267,7 @@ defmodule WuunderUtils.Maps do
       %{"weight" => 350, "value" => 25}
 
   """
-  @spec put_field(map() | struct() | nil, list(atom()) | String.t(), any()) :: any()
+  @spec put_field(map() | struct() | nil, list(atom()) | String.t() | atom(), any()) :: any()
   def put_field(map, key, value)
       when is_map(map) and is_valid_map_atom_key(key) do
     if Map.has_key?(map, key) || has_only_atom_keys?(map) do
