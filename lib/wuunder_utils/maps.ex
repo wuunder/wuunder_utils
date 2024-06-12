@@ -681,6 +681,17 @@ defmodule WuunderUtils.Maps do
         "meta.data" => "test"
       }
 
+      iex> WuunderUtils.Maps.flatten_map([
+      ...>     %{sku: "123", description: "test"},
+      ...>     %{sku: "456", description: "test 2"}
+      ...> ])
+      %{
+        "1.sku" => "123",
+        "1.description" => "test",
+        "2.sku" => "456",
+        "2.description" => "test 2"
+      }
+
       iex> WuunderUtils.Maps.flatten_map(
       ...>   %{
       ...>     test: "123",
@@ -705,12 +716,24 @@ defmodule WuunderUtils.Maps do
       }
 
   """
-  @spec flatten_map(map(), Keyword.t()) :: map()
-  def flatten_map(map, options \\ []) when is_map(map) and is_list(options),
+  @spec flatten_map(map() | list()) :: map()
+  def flatten_map(map_or_list), do: flatten_map(map_or_list, [])
+
+  @spec flatten_map(map() | list(), Keyword.t()) :: map()
+  def flatten_map(map, options) when is_map(map) and is_list(options),
     do:
       map
       |> from_struct()
       |> flatten_map(%{}, "", options)
+
+  def flatten_map(list, options) when is_list(list) and is_list(options) do
+    list_index_start = Keyword.get(options, :list_index_start, 1)
+
+    list
+    |> Enum.with_index()
+    |> Enum.map(&{elem(&1, 1) + list_index_start, elem(&1, 0)})
+    |> flatten_map(%{}, "", options)
+  end
 
   @spec flatten_map(map() | list(), map(), String.t(), Keyword.t()) :: map()
   def flatten_map(map_or_list, %{} = initial_map, key_prefix, options)
