@@ -714,26 +714,16 @@ defmodule WuunderUtils.Maps do
         "order_lines_1_description" => "test 2",
         "meta_data" => "test"
       }
-
   """
   @spec flatten_map(map() | list()) :: map()
   def flatten_map(map_or_list), do: flatten_map(map_or_list, [])
 
   @spec flatten_map(map() | list(), Keyword.t()) :: map()
-  def flatten_map(map, options) when is_map(map) and is_list(options),
-    do:
-      map
-      |> from_struct()
-      |> flatten_map(%{}, "", options)
+  def flatten_map(map, options) when is_map(map) and not is_struct(map) and is_list(options),
+    do: flatten_map(map, %{}, "", options)
 
-  def flatten_map(list, options) when is_list(list) and is_list(options) do
-    list_index_start = Keyword.get(options, :list_index_start, 1)
-
-    list
-    |> Enum.with_index()
-    |> Enum.map(&{elem(&1, 1) + list_index_start, elem(&1, 0)})
-    |> flatten_map(%{}, "", options)
-  end
+  def flatten_map(list, options) when is_list(list) and is_list(options),
+    do: flatten_list(list, %{}, "", options)
 
   @spec flatten_map(map() | list(), map(), String.t(), Keyword.t()) :: map()
   def flatten_map(map_or_list, %{} = initial_map, key_prefix, options)
@@ -741,26 +731,28 @@ defmodule WuunderUtils.Maps do
              is_list(options) do
     underscore_key = Keyword.get(options, :underscore_key, true)
     key_separator = Keyword.get(options, :key_separator, ".")
-    list_index_start = Keyword.get(options, :list_index_start, 1)
 
     Enum.reduce(map_or_list, initial_map, fn {key, value}, flat_map ->
       key = if underscore_key, do: Macro.underscore("#{key}"), else: "#{key}"
+
       new_key = "#{key_prefix}#{key}"
+      prefix = "#{new_key}#{key_separator}"
 
       cond do
-        is_map(value) ->
-          flatten_map(value, flat_map, "#{new_key}#{key_separator}", options)
-
-        is_list(value) ->
-          value
-          |> Enum.with_index()
-          |> Enum.map(&{elem(&1, 1) + list_index_start, elem(&1, 0)})
-          |> flatten_map(flat_map, "#{new_key}#{key_separator}", options)
-
-        true ->
-          Map.put(flat_map, "#{new_key}", value)
+        is_map(value) -> flatten_map(value, flat_map, prefix, options)
+        is_list(value) -> flatten_list(value, flat_map, prefix, options)
+        true -> Map.put(flat_map, "#{new_key}", value)
       end
     end)
+  end
+
+  @spec flatten_list(list(), map(), String.t(), Keyword.t()) :: map()
+  defp flatten_list(list, initial_map, prefix, options) do
+    list_index_start = Keyword.get(options, :list_index_start, 1)
+
+    list
+    |> Enum.with_index(fn element, index -> {index + list_index_start, element} end)
+    |> flatten_map(initial_map, prefix, options)
   end
 
   @doc """
