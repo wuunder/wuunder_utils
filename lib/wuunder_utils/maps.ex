@@ -714,17 +714,13 @@ defmodule WuunderUtils.Maps do
         "order_lines_1_description" => "test 2",
         "meta_data" => "test"
       }
-
   """
   @spec flatten_map(map() | list()) :: map()
   def flatten_map(map_or_list), do: flatten_map(map_or_list, [])
 
   @spec flatten_map(map() | list(), Keyword.t()) :: map()
-  def flatten_map(map, options) when is_map(map) and is_list(options),
-    do:
-      map
-      |> from_struct()
-      |> flatten_map(%{}, "", options)
+  def flatten_map(map, options) when is_map(map) and not is_struct(map) and is_list(options),
+    do: flatten_map(map, %{}, "", options)
 
   def flatten_map(list, options) when is_list(list) and is_list(options),
     do: flatten_list(list, %{}, "", options)
