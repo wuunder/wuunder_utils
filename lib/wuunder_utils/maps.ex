@@ -813,6 +813,82 @@ defmodule WuunderUtils.Maps do
     end)
   end
 
+  @doc """
+  Deep merges nested structures. It also traverses lists and tries to merge these too.
+  Note: the right-side of a list is leading. So if a list on the right-side is bigger or smaller, the list on
+  the left will be replaced with the values of the right-side.
+
+  ## Options
+
+  - `override_larger_lists` (default: `false`): Keeps items in left-side list when right-side is a smaller list
+
+  ## Examples
+
+      iex> left = [
+      ...>          %{name: "Peet", street: "Street", numbers: [1, 2, 3], items: [%{sku: "SKU123"}, %{sku: "SKU456"}, %{sku: "SKU999"}]},
+      ...>          %{name: "Walter", street: "Bourbon", number: nil}
+      ...>        ]
+      ...>
+      ...> right = [
+      ...>           %{name: "Henk", numbers: [1], items: [%{sku: "SKU000"}, %{sku: "SKU001"}]},
+      ...>           %{name: "Joop", street: "Other street", items: [%{sku: "SKU999"}]}
+      ...>         ]
+      ...>
+      ...> WuunderUtils.Maps.merge(left, right)
+      [
+        %{name: "Henk", street: "Street", numbers: [1], items: [%{sku: "SKU000"}, %{sku: "SKU001"}]},
+        %{name: "Joop", street: "Other street", number: nil, items: [%{sku: "SKU999"}]}
+      ]
+
+      iex> left = [
+      ...>          %{name: "Peet", street: "Street", numbers: [1, 2, 3], items: [%{sku: "SKU123"}, %{sku: "SKU456"}, %{sku: "SKU999", meta: %{data: false}}]},
+      ...>          %{name: "Walter", street: "Bourbon", number: nil}
+      ...>        ]
+      ...>
+      ...> right = [
+      ...>           %{name: "Henk", numbers: [1], items: [%{sku: "SKU000"}, %{sku: "SKU001"}]},
+      ...>           %{name: "Joop", street: "Other street", items: [%{sku: "SKU999"}]}
+      ...>         ]
+      ...>
+      ...> WuunderUtils.Maps.merge(left, right, override_larger_lists: true)
+      [
+        %{name: "Henk", street: "Street", numbers: [1, 2, 3], items: [%{sku: "SKU000"}, %{sku: "SKU001"}, %{sku: "SKU999", meta: %{data: false}}]},
+        %{name: "Joop", street: "Other street", number: nil, items: [%{sku: "SKU999"}]}
+      ]
+
+  """
+  @spec merge(any(), any()) :: any()
+  def merge(left, right), do: merge(left, right, override_larger_lists: false)
+
+  def merge(left, right, options) when is_map(left) and is_map(right) and is_list(options) do
+    right
+    |> Map.keys()
+    |> Enum.reduce(left, fn key, new_map ->
+      left_value = Map.get(new_map, key)
+      right_value = Map.get(right, key)
+
+      Map.put(new_map, key, merge(left_value, right_value, options))
+    end)
+  end
+
+  def merge(left, right, options) when is_list(left) and is_list(right) and is_list(options) do
+    new =
+      right
+      |> Enum.with_index()
+      |> Enum.map(fn {right_value, index} ->
+        left_value = Enum.at(left, index)
+        merge(left_value, right_value, options)
+      end)
+
+    if length(right) < length(left) && options[:override_larger_lists] do
+      new ++ Enum.slice(left, length(right), length(left) - length(right))
+    else
+      new
+    end
+  end
+
+  def merge(_left, right, options) when is_list(options), do: right
+
   defp transform_struct(module, struct, transform) do
     if has_ecto_schema?(module) do
       module
