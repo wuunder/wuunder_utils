@@ -784,6 +784,13 @@ defmodule WuunderUtils.Maps do
         shipment: %{wuunder_id: "WUUNDERID"}
       }
 
+      iex> WuunderUtils.Maps.delete_all([
+      ...>   %{id: "123", name: "test1"},
+      ...>   %{id: "456", name: "test2"},
+      ...>   %{id: "789", name: "test3"}
+      ...> ], [:id])
+      [%{name: "test1"}, %{name: "test2"}, %{name: "test3"}]
+
   """
   @spec delete_all(map(), list(String.t() | atom())) :: map()
   def delete_all(map, keys_to_delete) when is_map(map) and is_list(keys_to_delete) do
