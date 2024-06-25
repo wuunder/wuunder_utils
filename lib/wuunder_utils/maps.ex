@@ -824,6 +824,18 @@ defmodule WuunderUtils.Maps do
 
   ## Examples
 
+      iex> WuunderUtils.Maps.merge(%{items: [1, 2], name: "Peet"}, %{name: "Jan"})
+      %{items: [1, 2], name: "Jan"}
+
+      iex> WuunderUtils.Maps.merge(%{items: [%{sku: "1"}, %{sku: "2"}], name: "Peet"}, %{items: [%{name: "item 1"}, %{name: "item 2"}], name: "Jan"})
+      %{items: [%{sku: "1", name: "item 1"}, %{sku: "2", name: "item 2"}], name: "Jan"}
+
+      iex> WuunderUtils.Maps.merge([1, 2, 3], [4, 5])
+      [4, 5]
+
+      iex> WuunderUtils.Maps.merge([1, 2, 3], [4, 5], override_larger_lists: true)
+      [4, 5, 3]
+
       iex> left = [
       ...>          %{name: "Peet", street: "Street", numbers: [1, 2, 3], items: [%{sku: "SKU123"}, %{sku: "SKU456"}, %{sku: "SKU999"}]},
       ...>          %{name: "Walter", street: "Bourbon", number: nil}
