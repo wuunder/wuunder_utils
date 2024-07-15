@@ -37,19 +37,46 @@ defmodule WuunderUtils.Maps do
       iex> WuunderUtils.Maps.get_field(%{value: 20}, "currency", "EUR")
       "EUR"
 
+      iex> WuunderUtils.Maps.get_field([name: "Henk", name: "Kees", last_name: "Jansen"], "name")
+      "Henk"
+
       iex> WuunderUtils.Maps.get_field(["a", "b", "c"], 1)
       "b"
 
+
       iex> WuunderUtils.Maps.get_field(["a", "b", "c"], 3, "d")
+      "d"
+
+      iex> WuunderUtils.Maps.get_field({"a", "b", "c"}, 1)
+      "b"
+
+      iex> WuunderUtils.Maps.get_field({"a", "b", "c"}, 3, "d")
       "d"
 
   """
   @spec get_field(map() | list(), map_key() | non_neg_integer(), any()) :: any()
   def get_field(map, key, default \\ nil)
 
-  def get_field(map, index, default) when is_list(map) and is_number(index) do
-    Enum.at(map, index, default)
+  def get_field(list, index, default) when is_list(list) and is_number(index),
+    do: Enum.at(list, index, default)
+
+  def get_field(list, key, default) when is_list(list) and is_binary(key) do
+    atom_key = get_safe_key(key)
+
+    if is_atom(atom_key) && Keyword.keyword?(list) do
+      Keyword.get(list, atom_key, default)
+    else
+      default
+    end
   end
+
+  def get_field(tuple, index, _default)
+      when is_tuple(tuple) and is_number(index) and index < tuple_size(tuple),
+      do: elem(tuple, index)
+
+  def get_field(tuple, index, default)
+      when is_tuple(tuple) and is_number(index) and index >= tuple_size(tuple),
+      do: default
 
   def get_field(map, key, default)
       when is_map(map) and is_valid_map_atom_key(key) do
@@ -89,7 +116,7 @@ defmodule WuunderUtils.Maps do
       ...>     skills: [
       ...>       "programmer",
       ...>       "manager",
-      ...>       %{type: "hobby", name: "painting"}
+      ...>       %{type: "hobby", name: "painting", grades: {"A+", "C"}}
       ...>     ]
       ...>   }
       ...> }
@@ -103,7 +130,7 @@ defmodule WuunderUtils.Maps do
       iex> WuunderUtils.Maps.get_field_in(person, [:address, :company, :name])
       "Wuunder"
       iex> WuunderUtils.Maps.get_field_in(person, [:meta, :skills])
-      ["programmer", "manager", %{name: "painting", type: "hobby"}]
+      ["programmer", "manager", %{name: "painting", type: "hobby", grades: {"A+", "C"}}]
       iex> WuunderUtils.Maps.get_field_in(person, [:meta, :skills, 1])
       "manager"
       iex> WuunderUtils.Maps.get_field_in(person, "meta.skills.1")
@@ -112,28 +139,63 @@ defmodule WuunderUtils.Maps do
       "hobby"
       iex> WuunderUtils.Maps.get_field_in(person, "meta.skills.2.type")
       "hobby"
+      iex> WuunderUtils.Maps.get_field_in(person, "meta.skills.2.non_existent")
+      nil
+      iex> WuunderUtils.Maps.get_field_in(person, "meta.skills.2.non_existent", "default")
+      "default"
+      iex> WuunderUtils.Maps.get_field_in(person, "meta.skills.2.grades.0")
+      "A+"
+      iex> WuunderUtils.Maps.get_field_in(person, "meta.skills.2.grades.2", "none")
+      "none"
+
+      iex> keyword_list = [
+      ...>   name: "Henk",
+      ...>   last_name: "Jansen",
+      ...>   addresses: [
+      ...>     %{"street" => "Laan", "number" => 1},
+      ...>     %{"street" => "Straat", "number" => 1337}
+      ...>   ]
+      ...> ]
+      ...>
+      iex> WuunderUtils.Maps.get_field_in(keyword_list, "name")
+      "Henk"
+      iex> WuunderUtils.Maps.get_field_in(keyword_list, "addresses")
+      [%{"number" => 1, "street" => "Laan"}, %{"number" => 1337, "street" => "Straat"}]
+      iex> WuunderUtils.Maps.get_field_in(keyword_list, "addresses.0")
+      %{"number" => 1, "street" => "Laan"}
+      iex> WuunderUtils.Maps.get_field_in(keyword_list, "addresses.1.street")
+      "Straat"
+      iex> WuunderUtils.Maps.get_field_in(keyword_list, "addresses.1.other_field", "none")
+      "none"
+      iex> WuunderUtils.Maps.get_field_in(keyword_list, "addresses.2.other_field", "none")
+      nil
 
   """
-  @spec get_field_in(map() | struct() | nil, list(atom()) | String.t()) :: any()
-  def get_field_in(value, path) when is_binary(path) do
+  @spec get_field_in(any(), list(atom()) | String.t()) :: any()
+  def get_field_in(value, path, default \\ nil)
+
+  def get_field_in(value, path, default) when is_binary(path) do
     keys = keys_from_path(path)
 
-    get_field_in(value, keys)
+    get_field_in(value, keys, default)
   end
 
-  def get_field_in(nil, _keys), do: nil
+  def get_field_in(nil, _keys, _default), do: nil
 
-  def get_field_in(value, []), do: value
+  def get_field_in(value, [], _default), do: value
 
-  def get_field_in(value, _keys) when not is_map(value) and not is_list(value), do: nil
+  def get_field_in(value, _keys, _default)
+      when not is_map(value) and not is_list(value) and not is_tuple(value),
+      do: nil
 
-  def get_field_in(map_or_list, [key | rest]) when is_map(map_or_list) or is_list(map_or_list) do
-    map_or_list
-    |> get_field(key)
-    |> get_field_in(rest)
+  def get_field_in(map_list_or_tuple, [key | rest], default)
+      when is_map(map_list_or_tuple) or is_list(map_list_or_tuple) or is_tuple(map_list_or_tuple) do
+    map_list_or_tuple
+    |> get_field(key, default)
+    |> get_field_in(rest, default)
   end
 
-  def get_field_in(nil, keys) when is_list(keys), do: nil
+  def get_field_in(nil, keys, _default) when is_list(keys), do: nil
 
   @doc """
   Creates a map from a given set of fields. The output will always be a string.
