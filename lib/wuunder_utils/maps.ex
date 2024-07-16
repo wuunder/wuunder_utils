@@ -329,7 +329,8 @@ defmodule WuunderUtils.Maps do
       %{"weight" => 350, "value" => 25}
 
   """
-  @spec put_field(map() | struct() | nil, list(atom()) | String.t() | atom(), any()) :: any()
+  @spec put_field(map() | struct() | list() | nil, String.t() | atom(), any()) ::
+          map() | struct() | list()
   def put_field(map, key, value)
       when is_map(map) and is_valid_map_atom_key(key) do
     if Map.has_key?(map, key) || has_only_atom_keys?(map) do
@@ -339,9 +340,8 @@ defmodule WuunderUtils.Maps do
     end
   end
 
-  def put_field(list, index, value) when is_list(list) and is_integer(index) do
-    List.replace_at(list, index, value)
-  end
+  def put_field(list, index, value) when is_list(list) and is_integer(index),
+    do: List.replace_at(list, index, value)
 
   def put_field(map, key, value) when is_map(map) and is_valid_map_binary_key(key) do
     atom_key = get_safe_key(key)
@@ -388,7 +388,11 @@ defmodule WuunderUtils.Maps do
       %Person{person | meta: %{skills: ["programmer", "manager", %{name: "walking", type: "hobby"}]}}
 
   """
-  @spec put_field_in(map() | struct() | nil, list(atom()) | String.t(), any()) :: any()
+  @spec put_field_in(
+          map() | struct() | list() | nil,
+          list(atom() | String.t()) | String.t(),
+          any()
+        ) :: any()
   def put_field_in(value, path, value_to_set)
       when (is_map(value) or is_list(value)) and is_binary(path) do
     keys = keys_from_path(path)
