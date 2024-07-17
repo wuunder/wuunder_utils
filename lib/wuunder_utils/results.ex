@@ -641,6 +641,56 @@ defmodule WuunderUtils.Results do
 
   def get_success_values(value), do: get_success_values([value])
 
+  @doc """
+  Flattens a result tuple. Specifcally flattens the second value in the tuple.
+  Comes in handy when functions return a {:ok, _} or {:error, _} tuple with another tuple nested inside of it.
+
+  ## Examples
+
+      iex> WuunderUtils.Results.flatten_result({:error, {:internal_error, :get_orders, "Internal Server Error"}})
+      {:error, :internal_error, :get_orders, "Internal Server Error"}
+
+      iex> WuunderUtils.Results.flatten_result({:error, {:internal_error, :get_orders}, {1, 2}})
+      {:error, :internal_error, :get_orders, {1, 2}}
+
+      iex> WuunderUtils.Results.flatten_result({:error, {:internal_error, :get_orders, [1, 2]}, {1, 2}})
+      {:error, :internal_error, :get_orders, [1, 2], {1, 2}}
+
+      iex> WuunderUtils.Results.flatten_result({:error, :internal_error, :get_orders})
+      {:error, :internal_error, :get_orders}
+
+      iex> WuunderUtils.Results.flatten_result(:error)
+      :error
+  """
+  @spec flatten_result(any()) :: any()
+  def flatten_result(result) when is_tuple(result) do
+    cond do
+      result?(result) && is_tuple(elem(result, 1)) ->
+        # {:error, {:internal_error, :steps}, :more, :data}
+        values = Tuple.to_list(result)
+
+        # :error
+        code = List.first(values)
+
+        # {:internal_error, :steps}
+        value_to_flatten = Enum.at(values, 1)
+
+        # [:more, :data]
+        rest_values = Enum.slice(values, 2..-1//1)
+
+        List.to_tuple([code] ++ Tuple.to_list(value_to_flatten) ++ rest_values)
+
+      result?(result) ->
+        result
+
+      true ->
+        nil
+    end
+  end
+
+  def flatten_result(:ok), do: :ok
+  def flatten_result(:error), do: :error
+
   defp first_ok(results) when is_list(results),
     do:
       results
