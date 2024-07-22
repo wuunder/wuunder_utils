@@ -8,7 +8,7 @@ defmodule WuunderUtils.MixProject do
       description: "Set of helper modules",
       dialyzer: dialyzer_config(),
       docs: docs(),
-      elixir: "~> 1.14",
+      elixir: "~> 1.15",
       name: "Wuunder Utils",
       organization: "wuunder",
       package: package(),

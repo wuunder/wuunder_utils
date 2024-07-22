@@ -107,7 +107,8 @@ defmodule WuunderUtils.Results do
   def has_error?(results), do: error?(results)
 
   @doc """
-  Retrieves the first occurence of an error tuple in the result list
+  Retrieves the first occurrence of an error tuple from a list of results or checks a single result for an error.
+  returns {:error, :unknown} if unable to retrieve an error.
 
   ## Examples
 
@@ -132,7 +133,7 @@ defmodule WuunderUtils.Results do
     if error?(result) do
       get_result_value(result)
     else
-      nil
+      {:error, :unknown}
     end
   end
 
