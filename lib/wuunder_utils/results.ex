@@ -115,6 +115,34 @@ defmodule WuunderUtils.Results do
   def has_error?(results) when is_list(results), do: Enum.any?(results, &error?/1)
 
   @doc """
+  Returns error or ok from result list. Gives priority to error in list.
+
+  ## Examples
+
+      iex> WuunderUtils.Results.get_result([
+      ...>   {:ok, %Shipment{id: 1}},
+      ...>   {:ok, %Shipment{id: 2}},
+      ...>   {:error, :creation_error},
+      ...>   :error
+      ...> ])
+      {:error, :creation_error}
+
+      iex> WuunderUtils.Results.get_result([
+      ...>   {:ok, %Shipment{id: 1}},
+      ...>   {:ok, %Shipment{id: 2}},
+      ...> ])
+      {:ok, %Shipment{id: 1}}
+  """
+  @spec get_result(result_list()) :: result()
+  def get_result(results) when is_list(results) do
+    if has_error?(results) do
+      get_error(results)
+    else
+      get_ok(results)
+    end
+  end
+
+  @doc """
   Retrieves the first occurence of an error tuple in the result list
 
   ## Examples
