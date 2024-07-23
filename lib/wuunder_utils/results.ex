@@ -376,6 +376,27 @@ defmodule WuunderUtils.Results do
   def get_value(:error), do: nil
 
   @doc """
+  Grabs the values of a list of result tuples
+
+  ## Examples
+
+      iex> WuunderUtils.Results.get_values([{:ok, "value-1"}])
+      ["value-1"]
+
+      iex> WuunderUtils.Results.get_values([{:ok, "value-1", "value-2"}, {:ok, "value-3"}])
+      [{"value-1", "value-2"}, "value-3"]
+
+      iex> WuunderUtils.Results.get_values([{:error, :internal_server_error}])
+      [:internal_server_error]
+
+      iex> WuunderUtils.Results.get_values([:ok, :error])
+      [nil, nil]
+
+  """
+  @spec get_value(result_list()) :: term()
+  def get_values(result) when is_list(result), do: Enum.map(result, &get_value/1)
+
+  @doc """
   Flattens a result tuple. Specifcally flattens the second value in the tuple.
   Comes in handy when functions return a {:ok, _} or {:error, _} tuple with another tuple nested inside of it.
 
