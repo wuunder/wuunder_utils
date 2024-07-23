@@ -143,6 +143,35 @@ defmodule WuunderUtils.Results do
   end
 
   @doc """
+  Gets a list of errors or a list of ok's.
+  Gives the priority to list of errors
+
+  ## Examples
+
+      iex> WuunderUtils.Results.get_results([
+      ...>   {:ok, %Shipment{id: 1}},
+      ...>   {:ok, %Shipment{id: 2}},
+      ...>   {:error, :creation_error},
+      ...>   :error
+      ...> ])
+      [{:error, :creation_error}, :error]
+
+      iex> WuunderUtils.Results.get_results([
+      ...>   {:ok, %Shipment{id: 1}},
+      ...>   {:ok, %Shipment{id: 2}},
+      ...> ])
+      [{:ok, %Shipment{id: 1}}, {:ok, %Shipment{id: 2}}]
+  """
+  @spec get_results(result_list()) :: result_list()
+  def get_results(results) when is_list(results) do
+    if has_error?(results) do
+      get_errors(results)
+    else
+      get_oks(results)
+    end
+  end
+
+  @doc """
   Retrieves the first occurence of an error tuple in the result list
 
   ## Examples
