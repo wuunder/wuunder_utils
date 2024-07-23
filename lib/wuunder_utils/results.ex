@@ -435,4 +435,26 @@ defmodule WuunderUtils.Results do
   end
 
   def flatten_result(result) when is_result(result), do: result
+
+  @doc """
+  Wraps the given value in an ok tuple.
+
+  ## Examples
+
+      iex> WuunderUtils.Results.ok("value")
+      {:ok, "value"}
+  """
+  @spec ok(term()) :: result()
+  def ok(value), do: {:ok, value}
+
+  @doc """
+  Wraps the given value in an ok tuple.
+
+  ## Examples
+
+      iex> WuunderUtils.Results.error("value")
+      {:error, "value"}
+  """
+  @spec error(term()) :: result()
+  def error(value), do: {:error, value}
 end
