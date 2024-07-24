@@ -11,10 +11,12 @@ defmodule WuunderUtils.Results do
           | {:ok, term(), term()}
           | {:ok, term(), term(), term()}
           | {:ok, term(), term(), term(), term()}
+          | {:ok, term(), term(), term(), term(), term()}
           | {:error, term()}
           | {:error, term(), term()}
           | {:error, term(), term(), term()}
           | {:error, term(), term(), term(), term()}
+          | {:error, term(), term(), term(), term(), term()}
   @type result_list :: list(result())
 
   defguard is_result(result)
