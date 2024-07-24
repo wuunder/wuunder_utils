@@ -728,7 +728,7 @@ defmodule WuunderUtils.Maps do
 
   ## Example
 
-      iex> WuunderUtils.Maps.flatten_map(%{
+      iex> WuunderUtils.Maps.flatten(%{
       ...>   test: "123",
       ...>   order_lines: [
       ...>     %{sku: "123", description: "test"},
@@ -747,14 +747,14 @@ defmodule WuunderUtils.Maps do
         "meta.data" => "test"
       }
 
-      iex> WuunderUtils.Maps.flatten_map({1, 2, 3})
+      iex> WuunderUtils.Maps.flatten({1, 2, 3})
       %{
         "1" => 1,
         "2" => 2,
         "3" => 3,
       }
 
-      iex> WuunderUtils.Maps.flatten_map([
+      iex> WuunderUtils.Maps.flatten([
       ...>     %{sku: "123", description: "test"},
       ...>     %{sku: "456", description: "test 2"}
       ...> ])
@@ -765,7 +765,7 @@ defmodule WuunderUtils.Maps do
         "2.description" => "test 2"
       }
 
-      iex> WuunderUtils.Maps.flatten_map(
+      iex> WuunderUtils.Maps.flatten(
       ...>   %{
       ...>     test: "123",
       ...>     order_lines: [
@@ -792,27 +792,27 @@ defmodule WuunderUtils.Maps do
         "meta_data" => "test"
       }
   """
-  @spec flatten_map(map() | list() | tuple()) :: map()
-  def flatten_map(map_list_or_tuple), do: flatten_map(map_list_or_tuple, [])
+  @spec flatten(map() | list() | tuple()) :: map()
+  def flatten(map_list_or_tuple), do: flatten(map_list_or_tuple, [])
 
-  @spec flatten_map(map() | list() | tuple(), Keyword.t()) :: map()
-  def flatten_map(map, options) when is_map(map) and not is_struct(map) and is_list(options),
-    do: flatten_map(map, %{}, "", options)
+  @spec flatten(map() | list() | tuple(), Keyword.t()) :: map()
+  def flatten(map, options) when is_map(map) and not is_struct(map) and is_list(options),
+    do: flatten(map, %{}, "", options)
 
-  def flatten_map(list, options) when is_list(list) and is_list(options),
+  def flatten(list, options) when is_list(list) and is_list(options),
     do: flatten_list(list, %{}, "", options)
 
-  def flatten_map(tuple, options) when is_tuple(tuple) and is_list(options),
+  def flatten(tuple, options) when is_tuple(tuple) and is_list(options),
     do: flatten_tuple(tuple, %{}, "", options)
 
-  @spec flatten_map(map() | list() | tuple(), map(), String.t(), Keyword.t()) :: map()
-  def flatten_map(tuple, %{} = initial_map, key_prefix, options)
+  @spec flatten(map() | list() | tuple(), map(), String.t(), Keyword.t()) :: map()
+  def flatten(tuple, %{} = initial_map, key_prefix, options)
       when is_tuple(tuple) and
              is_binary(key_prefix) and
              is_list(options),
-      do: flatten_map(Tuple.to_list(tuple), initial_map, key_prefix, options)
+      do: flatten(Tuple.to_list(tuple), initial_map, key_prefix, options)
 
-  def flatten_map(map_or_list, %{} = initial_map, key_prefix, options)
+  def flatten(map_or_list, %{} = initial_map, key_prefix, options)
       when (is_map(map_or_list) or is_list(map_or_list)) and
              is_binary(key_prefix) and
              is_list(options) do
@@ -826,7 +826,7 @@ defmodule WuunderUtils.Maps do
       prefix = "#{new_key}#{key_separator}"
 
       cond do
-        is_map(value) -> flatten_map(value, flat_map, prefix, options)
+        is_map(value) -> flatten(value, flat_map, prefix, options)
         is_list(value) -> flatten_list(value, flat_map, prefix, options)
         is_tuple(value) -> flatten_tuple(value, flat_map, prefix, options)
         true -> Map.put(flat_map, "#{new_key}", value)
@@ -840,7 +840,7 @@ defmodule WuunderUtils.Maps do
 
     list
     |> Enum.with_index(fn element, index -> {index + list_index_start, element} end)
-    |> flatten_map(initial_map, prefix, options)
+    |> flatten(initial_map, prefix, options)
   end
 
   defp flatten_tuple(tuple, initial_map, prefix, options),
