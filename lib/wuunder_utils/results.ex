@@ -421,8 +421,7 @@ defmodule WuunderUtils.Results do
   def get_values(result) when is_list(result), do: Enum.map(result, &get_value/1)
 
   @doc """
-  Flattens a result tuple. Specifcally flattens the second value in the tuple.
-  Comes in handy when functions return a {:ok, _} or {:error, _} tuple with another tuple nested inside of it.
+  Flattens a result tuple. Comes in handy when functions return a {:ok, _} or {:error, _} tuple with another set of tuples nested inside of it.
 
   ## Examples
 
@@ -430,10 +429,10 @@ defmodule WuunderUtils.Results do
       {:error, :internal_error, :get_orders, "Internal Server Error"}
 
       iex> WuunderUtils.Results.flatten({:error, {:internal_error, :get_orders}, {1, 2}})
-      {:error, :internal_error, :get_orders, {1, 2}}
+      {:error, :internal_error, :get_orders, 1, 2}
 
       iex> WuunderUtils.Results.flatten({:error, {:internal_error, :get_orders, [1, 2]}, {1, 2}})
-      {:error, :internal_error, :get_orders, [1, 2], {1, 2}}
+      {:error, :internal_error, :get_orders, [1, 2], 1, 2}
 
       iex> WuunderUtils.Results.flatten({:error, :internal_error, :get_orders})
       {:error, :internal_error, :get_orders}
@@ -442,20 +441,17 @@ defmodule WuunderUtils.Results do
       :error
   """
   @spec flatten(result()) :: result()
-  def flatten(result) when is_result_tuple(result) and is_tuple(elem(result, 1)) do
-    # {:error, {:internal_error, :steps}, :more, :data}
-    values = Tuple.to_list(result)
-
-    # :error
-    code = List.first(values)
-
-    # {:internal_error, :steps}
-    value_to_flatten = Enum.at(values, 1)
-
-    # [:more, :data]
-    rest_values = Enum.slice(values, 2..-1//1)
-
-    List.to_tuple([code] ++ Tuple.to_list(value_to_flatten) ++ rest_values)
+  def flatten(result) when is_result_tuple(result) do
+    result
+    |> Tuple.to_list()
+    |> Enum.reduce([], fn value, acc ->
+      if is_tuple(value) do
+        acc ++ Tuple.to_list(value)
+      else
+        acc ++ [value]
+      end
+    end)
+    |> List.to_tuple()
   end
 
   def flatten(result) when is_result(result), do: result
