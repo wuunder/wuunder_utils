@@ -402,23 +402,23 @@ defmodule WuunderUtils.Results do
 
   ## Examples
 
-      iex> WuunderUtils.Results.flatten_result({:error, {:internal_error, :get_orders, "Internal Server Error"}})
+      iex> WuunderUtils.Results.flatten({:error, {:internal_error, :get_orders, "Internal Server Error"}})
       {:error, :internal_error, :get_orders, "Internal Server Error"}
 
-      iex> WuunderUtils.Results.flatten_result({:error, {:internal_error, :get_orders}, {1, 2}})
+      iex> WuunderUtils.Results.flatten({:error, {:internal_error, :get_orders}, {1, 2}})
       {:error, :internal_error, :get_orders, {1, 2}}
 
-      iex> WuunderUtils.Results.flatten_result({:error, {:internal_error, :get_orders, [1, 2]}, {1, 2}})
+      iex> WuunderUtils.Results.flatten({:error, {:internal_error, :get_orders, [1, 2]}, {1, 2}})
       {:error, :internal_error, :get_orders, [1, 2], {1, 2}}
 
-      iex> WuunderUtils.Results.flatten_result({:error, :internal_error, :get_orders})
+      iex> WuunderUtils.Results.flatten({:error, :internal_error, :get_orders})
       {:error, :internal_error, :get_orders}
 
-      iex> WuunderUtils.Results.flatten_result(:error)
+      iex> WuunderUtils.Results.flatten(:error)
       :error
   """
-  @spec flatten_result(result()) :: result()
-  def flatten_result(result) when is_result_tuple(result) and is_tuple(elem(result, 1)) do
+  @spec flatten(result()) :: result()
+  def flatten(result) when is_result_tuple(result) and is_tuple(elem(result, 1)) do
     # {:error, {:internal_error, :steps}, :more, :data}
     values = Tuple.to_list(result)
 
@@ -434,7 +434,7 @@ defmodule WuunderUtils.Results do
     List.to_tuple([code] ++ Tuple.to_list(value_to_flatten) ++ rest_values)
   end
 
-  def flatten_result(result) when is_result(result), do: result
+  def flatten(result) when is_result(result), do: result
 
   @doc """
   Wraps the given value in an ok tuple.
