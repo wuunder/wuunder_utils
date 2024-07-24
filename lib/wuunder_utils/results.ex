@@ -4,19 +4,26 @@ defmodule WuunderUtils.Results do
   """
 
   # poor mans typing, but it covers most usecases
-  @type result ::
-          :ok
-          | :error
-          | {:ok, term()}
-          | {:ok, term(), term()}
-          | {:ok, term(), term(), term()}
-          | {:ok, term(), term(), term(), term()}
-          | {:ok, term(), term(), term(), term(), term()}
-          | {:error, term()}
-          | {:error, term(), term()}
-          | {:error, term(), term(), term()}
-          | {:error, term(), term(), term(), term()}
-          | {:error, term(), term(), term(), term(), term()}
+  @type ok :: :ok
+
+  @type error :: :error
+
+  @type ok_tuple ::
+          {ok(), term()}
+          | {ok(), term(), term()}
+          | {ok(), term(), term(), term()}
+          | {ok(), term(), term(), term(), term()}
+          | {ok(), term(), term(), term(), term(), term()}
+
+  @type error_tuple ::
+          {error(), term()}
+          | {error(), term(), term()}
+          | {error(), term(), term(), term()}
+          | {error(), term(), term(), term(), term()}
+          | {error(), term(), term(), term(), term(), term()}
+
+  @type result :: ok() | error() | ok_tuple() | error_tuple()
+
   @type result_list :: list(result())
 
   defguard is_result(result)
@@ -187,8 +194,16 @@ defmodule WuunderUtils.Results do
        ...> WuunderUtils.Results.get_error(results)
        {:error, :creation_error}
 
+       iex> results = [
+       ...>   {:ok, %Shipment{id: 1}},
+       ...>   {:ok, %Shipment{id: 2}},
+       ...> ]
+       ...>
+       ...> WuunderUtils.Results.get_error(results)
+       nil
+
   """
-  @spec get_error(result_list()) :: result()
+  @spec get_error(result_list()) :: result() | nil
   def get_error(results) when is_list(results),
     do:
       results
@@ -229,8 +244,15 @@ defmodule WuunderUtils.Results do
        ...> WuunderUtils.Results.get_ok(results)
        {:ok, %Shipment{id: 1}}
 
+       iex> results = [
+       ...>   {:error, :creation_error}
+       ...> ]
+       ...>
+       ...> WuunderUtils.Results.get_ok(results)
+       nil
+
   """
-  @spec get_ok(result_list()) :: result()
+  @spec get_ok(result_list()) :: result() | nil
   def get_ok(results) when is_list(results),
     do:
       results
@@ -446,7 +468,7 @@ defmodule WuunderUtils.Results do
       iex> WuunderUtils.Results.ok("value")
       {:ok, "value"}
   """
-  @spec ok(term()) :: result()
+  @spec ok(term()) :: {:ok, term()}
   def ok(value), do: {:ok, value}
 
   @doc """
@@ -457,6 +479,6 @@ defmodule WuunderUtils.Results do
       iex> WuunderUtils.Results.error("value")
       {:error, "value"}
   """
-  @spec error(term()) :: result()
+  @spec error(term()) :: {:error, term()}
   def error(value), do: {:error, value}
 end
