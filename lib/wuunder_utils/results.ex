@@ -465,10 +465,10 @@ defmodule WuunderUtils.Results do
       {:ok, "value"}
   """
   @spec ok(term()) :: {:ok, term()}
-  def ok(value), do: {:ok, value}
+  def ok(value) when not is_ok_result(value), do: {:ok, value}
 
   @doc """
-  Wraps the given value in an ok tuple.
+  Wraps the given value in an error tuple.
 
   ## Examples
 
@@ -476,5 +476,5 @@ defmodule WuunderUtils.Results do
       {:error, "value"}
   """
   @spec error(term()) :: {:error, term()}
-  def error(value), do: {:error, value}
+  def error(value) when not is_error_result(value), do: {:error, value}
 end
