@@ -1046,6 +1046,114 @@ defmodule WuunderUtils.Maps do
     end)
   end
 
+  @doc """
+  Trims an incoming map/list/tuple. Removes all keys that have a `nil` value. Structs with an empty value
+  will reset to the default value. Items in lists and tuples that contain nil values will be deleted.
+
+  ## Examples
+
+        iex> WuunderUtils.Maps.delete_empty(%{name: nil, last_name: "Jansen"})
+        %{last_name: "Jansen"}
+
+        iex> WuunderUtils.Maps.delete_empty(%{name: nil, last_name: nil})
+        nil
+
+        iex> WuunderUtils.Maps.delete_empty({1, 2, nil, 3, 4})
+        {1, 2, 3, 4}
+
+        iex> WuunderUtils.Maps.delete_empty([1, 2, nil, 3, 4])
+        [1, 2, 3, 4]
+
+        iex> WuunderUtils.Maps.delete_empty(%{items: [%{a: nil, b: nil}, %{a: 1, b: 2}]})
+        %{items: [%{a: 1, b: 2}]}
+
+        iex> WuunderUtils.Maps.delete_empty(%{items: [%{a: [1, nil, %{x: 1337, y: {1, nil, 2, {nil, nil}}}], b: nil}, %{a: 1, b: 2}]})
+        %{items: [%{a: [1, %{y: {1, 2}, x: 1337}]}, %{a: 1, b: 2}]}
+  """
+  @spec delete_empty(any()) :: any()
+  def delete_empty(value) when is_map(value) do
+    new_map =
+      value
+      |> Map.keys()
+      |> Enum.reduce(value, fn key, new_map ->
+        value = Map.get(new_map, key)
+        new_value = delete_empty(value)
+
+        if is_nil(new_value) do
+          delete_field(new_map, key)
+        else
+          put_field(new_map, key, new_value)
+        end
+      end)
+
+    cond do
+      is_struct(new_map) -> new_map
+      is_map(new_map) && Enum.empty?(Map.keys(new_map)) -> nil
+      true -> new_map
+    end
+  end
+
+  def delete_empty(list) when is_list(list) do
+    new_list =
+      list
+      |> Enum.map(&delete_empty/1)
+      |> Enum.reject(&is_nil/1)
+
+    if Enum.any?(new_list) do
+      new_list
+    else
+      nil
+    end
+  end
+
+  def delete_empty(tuple) when is_tuple(tuple) do
+    new_tuple =
+      tuple
+      |> Tuple.to_list()
+      |> Enum.map(&delete_empty/1)
+      |> Enum.reject(&is_nil/1)
+
+    if Enum.any?(new_tuple) do
+      List.to_tuple(new_tuple)
+    else
+      nil
+    end
+  end
+
+  def delete_empty(value), do: value
+
+  @doc """
+  Maps a given function over entire structure (map/list/struct/tuple)
+
+  ## Examples
+
+        iex> WuunderUtils.Maps.map_all(%{name: " test ", data: ["some item", "other item   ", %{x: "  value"}]}, &WuunderUtils.Presence.trim/1)
+        %{data: ["some item", "other item", %{x: "value"}], name: "test"}
+  """
+  @spec map_all(any(), function()) :: any()
+  def map_all(value, map_fn) when is_map(value) and is_function(map_fn) do
+    value
+    |> Map.keys()
+    |> Enum.reduce(value, fn key, new_map ->
+      value = Map.get(new_map, key)
+      new_value = map_all(value, map_fn)
+
+      put_field(new_map, key, new_value)
+    end)
+  end
+
+  def map_all(values, map_fn) when is_list(values) and is_function(map_fn),
+    do: Enum.map(values, &map_all(&1, map_fn))
+
+  def map_all(values, map_fn) when is_tuple(values) and is_function(map_fn) do
+    values
+    |> Tuple.to_list()
+    |> map_all(map_fn)
+    |> List.to_tuple()
+  end
+
+  def map_all(value, map_fn), do: map_fn.(value)
+
   defp transform_struct(module, struct, transform) do
     if has_ecto_schema?(module) do
       module

@@ -67,4 +67,19 @@ defmodule WuunderUtils.Presence do
   """
   @spec empty?(t()) :: boolean()
   def empty?(value), do: any?(value) == false
+
+  @doc """
+  Optionally trims data
+
+  ## Examples
+
+      iex> WuunderUtils.Presence.trim(" test ")
+      "test"
+
+      iex> WuunderUtils.Presence.trim(nil)
+      nil
+  """
+  @spec trim(any()) :: any()
+  def trim(value) when is_binary(value), do: String.trim(value)
+  def trim(value), do: value
 end
