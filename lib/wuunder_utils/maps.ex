@@ -54,7 +54,7 @@ defmodule WuunderUtils.Maps do
       "d"
 
   """
-  @spec get_field(map() | list(), map_key() | non_neg_integer(), any()) :: any()
+  @spec get_field(any(), map_key() | non_neg_integer(), any()) :: any()
   def get_field(map, key, default \\ nil)
 
   def get_field(list, index, default) when is_list(list) and is_number(index),
@@ -425,8 +425,50 @@ defmodule WuunderUtils.Maps do
       iex> WuunderUtils.Maps.delete_field(%{"value" => 50, "currency" => "EUR"}, :currency)
       %{"value" => 50}
 
+      iex> WuunderUtils.Maps.delete_field(["a", "b", "c"], 1)
+      ["a", "c"]
+
+      iex> WuunderUtils.Maps.delete_field({"a", "b", "c"}, 1)
+      {"a", "c"}
+
+      iex> country = %Country{code: "NL"}
+      ...>
+      ...> WuunderUtils.Maps.delete_field(country, :code)
+      %Country{code: ""}
+
+      iex> country = %Country{code: "NL"}
+      ...>
+      ...> WuunderUtils.Maps.delete_field(country, "code")
+      %Country{code: ""}
+
+      iex> country = %Country{code: "NL"}
+      ...>
+      ...> WuunderUtils.Maps.delete_field(country, "does_not_exist")
+      %Country{code: "NL"}
+
   """
-  @spec delete_field(map(), map_key()) :: map
+  @spec delete_field(any(), map_key() | non_neg_integer()) :: any()
+  def delete_field(%module{} = struct, key)
+      when is_struct(struct) and is_valid_map_atom_key(key) do
+    default = struct(module, %{})
+
+    if Map.has_key?(default, key) do
+      put_field(struct, key, Map.get(default, key))
+    else
+      struct
+    end
+  end
+
+  def delete_field(struct, key) when is_struct(struct) and is_valid_map_binary_key(key) do
+    atom_key = get_safe_key(key)
+
+    if Map.has_key?(struct, atom_key) do
+      delete_field(struct, atom_key)
+    else
+      struct
+    end
+  end
+
   def delete_field(map, key) when is_map(map) and is_valid_map_atom_key(key) do
     if has_only_atom_keys?(map) do
       Map.delete(map, key)
@@ -434,6 +476,20 @@ defmodule WuunderUtils.Maps do
       Map.delete(map, "#{key}")
     end
   end
+
+  def delete_field(tuple, index)
+      when is_tuple(tuple) and is_number(index) and index < tuple_size(tuple),
+      do: Tuple.delete_at(tuple, index)
+
+  def delete_field(tuple, index)
+      when is_tuple(tuple) and is_number(index) and index >= tuple_size(tuple),
+      do: tuple
+
+  def delete_field(list, index) when is_list(list) and is_number(index) and index < length(list),
+    do: List.delete_at(list, index)
+
+  def delete_field(list, index) when is_list(list) and is_number(index) and index >= length(list),
+    do: list
 
   def delete_field(map, key) when is_map(map) and is_valid_map_binary_key(key) do
     atom_key = get_safe_key(key)
@@ -444,6 +500,92 @@ defmodule WuunderUtils.Maps do
       Map.delete(map, key)
     end
   end
+
+  @doc """
+  Removes a deeply nested set of keys
+
+  ## Examples
+
+      iex> WuunderUtils.Maps.delete_field_in(%{"data" => [%{"name" => "Piet"}, %{"name" => "Henk"}]}, "data.0.name")
+      %{"data" => [%{}, %{"name" => "Henk"}]}
+
+      iex> person = %Person{
+      ...>   country: %Country{code: "NL"},
+      ...>   address: %Address{
+      ...>     street: "Teststreet",
+      ...>     company: %Company{name: "Wuunder"}
+      ...>   },
+      ...>   meta: %{
+      ...>     skills: [
+      ...>       "programmer",
+      ...>       "manager",
+      ...>       %{type: "hobby", name: "painting", grades: {"A+", "C"}}
+      ...>     ]
+      ...>   }
+      ...> }
+      ...>
+      ...> WuunderUtils.Maps.delete_field_in(person, [:country, :code])
+      %Person{
+        country: %Country{code: ""},
+        address: %Address{
+          street: "Teststreet",
+          company: %Company{name: "Wuunder"}
+        },
+        meta: %{
+          skills: [
+            "programmer",
+            "manager",
+            %{type: "hobby", name: "painting", grades: {"A+", "C"}}
+          ]
+        }
+      }
+      iex> WuunderUtils.Maps.delete_field_in(person, "meta.skills.1")
+      %Person{
+        country: %Country{code: "NL"},
+        address: %Address{
+          street: "Teststreet",
+          company: %Company{name: "Wuunder"}
+        },
+        meta: %{
+          skills: [
+            "programmer",
+            %{type: "hobby", name: "painting", grades: {"A+", "C"}}
+          ]
+        }
+      }
+  """
+  @spec delete_field_in(any(), list(atom()) | String.t()) :: any()
+  def delete_field_in(value, path) when is_binary(path) do
+    keys = keys_from_path(path)
+    delete_field_in(value, keys)
+  end
+
+  def delete_field_in(nil, _keys), do: nil
+
+  def delete_field_in(value, []), do: value
+
+  def delete_field_in(value, _keys)
+      when not is_map(value) and not is_list(value) and not is_tuple(value),
+      do: nil
+
+  def delete_field_in(map_list_or_tuple, [key])
+      when is_map(map_list_or_tuple) or is_list(map_list_or_tuple) or is_tuple(map_list_or_tuple),
+      do: delete_field(map_list_or_tuple, key)
+
+  def delete_field_in(map_list_or_tuple, [_head | _tail] = keys)
+      when is_map(map_list_or_tuple) or is_list(map_list_or_tuple) or is_tuple(map_list_or_tuple) do
+    before_last_key = Enum.slice(keys, 0..-2//1)
+    last_key = List.last(keys)
+
+    new_value =
+      map_list_or_tuple
+      |> get_field_in(before_last_key)
+      |> delete_field(last_key)
+
+    put_field_in(map_list_or_tuple, before_last_key, new_value)
+  end
+
+  def delete_field_in(nil, keys) when is_list(keys), do: nil
 
   @doc """
   Tests if the given map only consists of atom keys
