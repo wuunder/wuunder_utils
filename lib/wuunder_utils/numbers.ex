@@ -102,6 +102,40 @@ defmodule WuunderUtils.Numbers do
   end
 
   @doc """
+  Tries to convert a number to a string. When the given value is already a binary, it tries to parse it and output it accordingly.
+
+  ## Examples
+
+      iex> WuunderUtils.Numbers.as_string(13.37)
+      "13.37"
+
+      iex> WuunderUtils.Numbers.as_string(Decimal.new("13.37"))
+      "13.37"
+
+      iex> WuunderUtils.Numbers.as_string(1337)
+      "1337"
+
+      iex> WuunderUtils.Numbers.as_string("1337")
+      "1337.0"
+
+      iex> WuunderUtils.Numbers.as_string("1abc300")
+      "1.0"
+
+  """
+  @spec as_string(any()) :: String.t() | nil
+  def as_string(value) when is_decimal(value), do: Decimal.to_string(value)
+  def as_string(value) when is_float(value), do: Float.to_string(value)
+  def as_string(value) when is_integer(value), do: Integer.to_string(value)
+
+  def as_string(value) when is_binary(value) do
+    value
+    |> parse_float()
+    |> as_string()
+  end
+
+  def as_string(nil), do: nil
+
+  @doc """
   Adds two Decimal's together. Defaults back to 0.
 
   ## Examples
