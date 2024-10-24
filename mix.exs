@@ -42,7 +42,7 @@ defmodule WuunderUtils.MixProject do
     [
       name: "wuunder_utils",
       files: ~w(lib .formatter.exs mix.exs README*),
-      licenses: ["Apache-2.0"],
+      licenses: ["MIT"],
       links: %{
         "GitHub" => "https://github.com/wuunder/wuunder_utils",
         "Docs" => "https://hexdocs.pm/wuunder_utils"
