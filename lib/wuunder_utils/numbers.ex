@@ -122,7 +122,9 @@ defmodule WuunderUtils.Numbers do
       "1.0"
 
   """
-  @spec as_string(any()) :: String.t() | nil
+  @spec as_string(term()) :: nil | String.t()
+  def as_string(nil), do: nil
+
   def as_string(value) when is_decimal(value), do: Decimal.to_string(value)
   def as_string(value) when is_float(value), do: Float.to_string(value)
   def as_string(value) when is_integer(value), do: Integer.to_string(value)
@@ -132,8 +134,6 @@ defmodule WuunderUtils.Numbers do
     |> parse_float()
     |> as_string()
   end
-
-  def as_string(nil), do: nil
 
   @doc """
   Adds two Decimal's together. Defaults back to 0.

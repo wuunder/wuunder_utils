@@ -16,51 +16,51 @@ defmodule WuunderUtils.Maps do
 
   ## Examples
 
-      iex> WuunderUtils.Maps.get_field(%{value: 20}, :value)
+      iex> WuunderUtils.Maps.get(%{value: 20}, :value)
       20
 
-      iex> WuunderUtils.Maps.get_field(%{"value" => 20}, :value)
+      iex> WuunderUtils.Maps.get(%{"value" => 20}, :value)
       20
 
-      iex> WuunderUtils.Maps.get_field(%{value: 20}, "value")
+      iex> WuunderUtils.Maps.get(%{value: 20}, "value")
       20
 
-      iex> WuunderUtils.Maps.get_field(%{value: 20}, "non-existent")
+      iex> WuunderUtils.Maps.get(%{value: 20}, "non-existent")
       nil
 
-      iex> WuunderUtils.Maps.get_field(%{value: 20}, :weight)
+      iex> WuunderUtils.Maps.get(%{value: 20}, :weight)
       nil
 
-      iex> WuunderUtils.Maps.get_field(%{value: 20}, :weight, 350)
+      iex> WuunderUtils.Maps.get(%{value: 20}, :weight, 350)
       350
 
-      iex> WuunderUtils.Maps.get_field(%{value: 20}, "currency", "EUR")
+      iex> WuunderUtils.Maps.get(%{value: 20}, "currency", "EUR")
       "EUR"
 
-      iex> WuunderUtils.Maps.get_field([name: "Henk", name: "Kees", last_name: "Jansen"], "name")
+      iex> WuunderUtils.Maps.get([name: "Henk", name: "Kees", last_name: "Jansen"], "name")
       "Henk"
 
-      iex> WuunderUtils.Maps.get_field(["a", "b", "c"], 1)
+      iex> WuunderUtils.Maps.get(["a", "b", "c"], 1)
       "b"
 
 
-      iex> WuunderUtils.Maps.get_field(["a", "b", "c"], 3, "d")
+      iex> WuunderUtils.Maps.get(["a", "b", "c"], 3, "d")
       "d"
 
-      iex> WuunderUtils.Maps.get_field({"a", "b", "c"}, 1)
+      iex> WuunderUtils.Maps.get({"a", "b", "c"}, 1)
       "b"
 
-      iex> WuunderUtils.Maps.get_field({"a", "b", "c"}, 3, "d")
+      iex> WuunderUtils.Maps.get({"a", "b", "c"}, 3, "d")
       "d"
 
   """
-  @spec get_field(any(), map_key() | non_neg_integer(), any()) :: any()
-  def get_field(map, key, default \\ nil)
+  @spec get(any(), map_key() | non_neg_integer(), any()) :: any()
+  def get(map, key, default \\ nil)
 
-  def get_field(list, index, default) when is_list(list) and is_number(index),
+  def get(list, index, default) when is_list(list) and is_number(index),
     do: Enum.at(list, index, default)
 
-  def get_field(list, key, default) when is_list(list) and is_binary(key) do
+  def get(list, key, default) when is_list(list) and is_binary(key) do
     atom_key = get_safe_key(key)
 
     if is_atom(atom_key) && Keyword.keyword?(list) do
@@ -70,15 +70,15 @@ defmodule WuunderUtils.Maps do
     end
   end
 
-  def get_field(tuple, index, _default)
+  def get(tuple, index, _default)
       when is_tuple(tuple) and is_number(index) and index < tuple_size(tuple),
       do: elem(tuple, index)
 
-  def get_field(tuple, index, default)
+  def get(tuple, index, default)
       when is_tuple(tuple) and is_number(index) and index >= tuple_size(tuple),
       do: default
 
-  def get_field(map, key, default)
+  def get(map, key, default)
       when is_map(map) and is_valid_map_atom_key(key) do
     if Map.has_key?(map, key) do
       Map.get(map, key)
@@ -87,7 +87,7 @@ defmodule WuunderUtils.Maps do
     end
   end
 
-  def get_field(map, key, default) when is_map(map) and is_valid_map_binary_key(key) do
+  def get(map, key, default) when is_map(map) and is_valid_map_binary_key(key) do
     atom_key = get_safe_key(key)
 
     if is_atom(atom_key) && Map.has_key?(map, atom_key) do
@@ -121,31 +121,31 @@ defmodule WuunderUtils.Maps do
       ...>   }
       ...> }
       ...>
-      ...> WuunderUtils.Maps.get_field_in(person, [:country, :code])
+      ...> WuunderUtils.Maps.deep_get(person, [:country, :code])
       "NL"
-      iex> WuunderUtils.Maps.get_field_in(person, "country.code")
+      iex> WuunderUtils.Maps.deep_get(person, "country.code")
       "NL"
-      iex> WuunderUtils.Maps.get_field_in(person, [:address, :company])
+      iex> WuunderUtils.Maps.deep_get(person, [:address, :company])
       %Company{name: "Wuunder"}
-      iex> WuunderUtils.Maps.get_field_in(person, [:address, :company, :name])
+      iex> WuunderUtils.Maps.deep_get(person, [:address, :company, :name])
       "Wuunder"
-      iex> WuunderUtils.Maps.get_field_in(person, [:meta, :skills])
+      iex> WuunderUtils.Maps.deep_get(person, [:meta, :skills])
       ["programmer", "manager", %{name: "painting", type: "hobby", grades: {"A+", "C"}}]
-      iex> WuunderUtils.Maps.get_field_in(person, [:meta, :skills, 1])
+      iex> WuunderUtils.Maps.deep_get(person, [:meta, :skills, 1])
       "manager"
-      iex> WuunderUtils.Maps.get_field_in(person, "meta.skills.1")
+      iex> WuunderUtils.Maps.deep_get(person, "meta.skills.1")
       "manager"
-      iex> WuunderUtils.Maps.get_field_in(person, [:meta, :skills, 2, :type])
+      iex> WuunderUtils.Maps.deep_get(person, [:meta, :skills, 2, :type])
       "hobby"
-      iex> WuunderUtils.Maps.get_field_in(person, "meta.skills.2.type")
+      iex> WuunderUtils.Maps.deep_get(person, "meta.skills.2.type")
       "hobby"
-      iex> WuunderUtils.Maps.get_field_in(person, "meta.skills.2.non_existent")
+      iex> WuunderUtils.Maps.deep_get(person, "meta.skills.2.non_existent")
       nil
-      iex> WuunderUtils.Maps.get_field_in(person, "meta.skills.2.non_existent", "default")
+      iex> WuunderUtils.Maps.deep_get(person, "meta.skills.2.non_existent", "default")
       "default"
-      iex> WuunderUtils.Maps.get_field_in(person, "meta.skills.2.grades.0")
+      iex> WuunderUtils.Maps.deep_get(person, "meta.skills.2.grades.0")
       "A+"
-      iex> WuunderUtils.Maps.get_field_in(person, "meta.skills.2.grades.2", "none")
+      iex> WuunderUtils.Maps.deep_get(person, "meta.skills.2.grades.2", "none")
       "none"
 
       iex> keyword_list = [
@@ -157,45 +157,45 @@ defmodule WuunderUtils.Maps do
       ...>   ]
       ...> ]
       ...>
-      iex> WuunderUtils.Maps.get_field_in(keyword_list, "name")
+      iex> WuunderUtils.Maps.deep_get(keyword_list, "name")
       "Henk"
-      iex> WuunderUtils.Maps.get_field_in(keyword_list, "addresses")
+      iex> WuunderUtils.Maps.deep_get(keyword_list, "addresses")
       [%{"number" => 1, "street" => "Laan"}, %{"number" => 1337, "street" => "Straat"}]
-      iex> WuunderUtils.Maps.get_field_in(keyword_list, "addresses.0")
+      iex> WuunderUtils.Maps.deep_get(keyword_list, "addresses.0")
       %{"number" => 1, "street" => "Laan"}
-      iex> WuunderUtils.Maps.get_field_in(keyword_list, "addresses.1.street")
+      iex> WuunderUtils.Maps.deep_get(keyword_list, "addresses.1.street")
       "Straat"
-      iex> WuunderUtils.Maps.get_field_in(keyword_list, "addresses.1.other_field", "none")
+      iex> WuunderUtils.Maps.deep_get(keyword_list, "addresses.1.other_field", "none")
       "none"
-      iex> WuunderUtils.Maps.get_field_in(keyword_list, "addresses.2.other_field", "none")
+      iex> WuunderUtils.Maps.deep_get(keyword_list, "addresses.2.other_field", "none")
       nil
 
   """
-  @spec get_field_in(any(), list(atom()) | String.t()) :: any()
-  def get_field_in(value, path, default \\ nil)
+  @spec deep_get(any(), list(atom()) | String.t()) :: any()
+  def deep_get(value, path, default \\ nil)
 
-  def get_field_in(value, path, default) when is_binary(path) do
+  def deep_get(value, path, default) when is_binary(path) do
     keys = keys_from_path(path)
 
-    get_field_in(value, keys, default)
+    deep_get(value, keys, default)
   end
 
-  def get_field_in(nil, _keys, _default), do: nil
+  def deep_get(nil, _keys, _default), do: nil
 
-  def get_field_in(value, [], _default), do: value
+  def deep_get(value, [], _default), do: value
 
-  def get_field_in(value, _keys, _default)
+  def deep_get(value, _keys, _default)
       when not is_map(value) and not is_list(value) and not is_tuple(value),
       do: nil
 
-  def get_field_in(map_list_or_tuple, [key | rest], default)
+  def deep_get(map_list_or_tuple, [key | rest], default)
       when is_map(map_list_or_tuple) or is_list(map_list_or_tuple) or is_tuple(map_list_or_tuple) do
     map_list_or_tuple
-    |> get_field(key, default)
-    |> get_field_in(rest, default)
+    |> get(key, default)
+    |> deep_get(rest, default)
   end
 
-  def get_field_in(nil, keys, _default) when is_list(keys), do: nil
+  def deep_get(nil, keys, _default) when is_list(keys), do: nil
 
   @doc """
   Creates a map from a given set of fields. The output will always be a string.
@@ -217,7 +217,7 @@ defmodule WuunderUtils.Maps do
       ...>   }
       ...> }
       ...>
-      ...> WuunderUtils.Maps.get_fields_in(
+      ...> WuunderUtils.Maps.deep_get_values(
       ...>   person,
       ...>   [
       ...>     [:country, :code],
@@ -236,8 +236,8 @@ defmodule WuunderUtils.Maps do
       }
 
   """
-  @spec get_fields_in(map() | struct() | list(), list()) :: map()
-  def get_fields_in(value, fields) do
+  @spec deep_get_values(map() | struct() | list(), list()) :: map()
+  def deep_get_values(value, fields) do
     initial_map =
       Enum.reduce(fields, %{}, fn field, initial_map ->
         keys =
@@ -245,18 +245,18 @@ defmodule WuunderUtils.Maps do
           |> get_keys()
           |> ensure_zero_index()
 
-        Map.merge(initial_map, empty_map(keys))
+        Map.merge(initial_map, new(keys))
       end)
 
     Enum.reduce(fields, initial_map, fn field, final_map ->
-      value = get_field_in(value, field)
+      value = deep_get(value, field)
 
       keys =
         field
         |> get_keys()
         |> ensure_zero_index()
 
-      put_field_in(final_map, keys, value)
+      deep_put(final_map, keys, value)
     end)
   end
 
@@ -265,40 +265,40 @@ defmodule WuunderUtils.Maps do
 
   ## Examples
 
-      iex> WuunderUtils.Maps.empty_map([:person, :name, :meta, 0, :hobby, :type])
+      iex> WuunderUtils.Maps.new([:person, :name, :meta, 0, :hobby, :type])
       %{"person" => %{"name" => %{"meta" => [%{"hobby" => %{"type" => %{}}}]}}}
 
-      iex> WuunderUtils.Maps.empty_map([:person, :name, :meta, 0, :hobbies, 0, :type])
+      iex> WuunderUtils.Maps.new([:person, :name, :meta, 0, :hobbies, 0, :type])
       %{"person" => %{"name" => %{"meta" => [%{"hobbies" => [%{"type" => %{}}]}]}}}
 
   """
-  @spec empty_map(String.t() | list()) :: map()
-  def empty_map(path) when is_binary(path) do
+  @spec new(String.t() | list()) :: map()
+  def new(path) when is_binary(path) do
     path
     |> keys_from_path()
-    |> empty_map()
+    |> new()
   end
 
-  def empty_map(keys) when is_list(keys), do: empty_map(%{}, keys)
+  def new(keys) when is_list(keys), do: new(%{}, keys)
 
-  @spec empty_map(map() | list(), list()) :: map() | list()
-  def empty_map(list, [key | rest]) when is_list(list) do
+  @spec new(map() | list(), list()) :: map() | list()
+  def new(list, [key | rest]) when is_list(list) do
     if is_integer(key) do
-      [empty_map(rest)]
+      [new(rest)]
     else
-      [%{"key" => empty_map(rest)}]
+      [%{"key" => new(rest)}]
     end
   end
 
-  def empty_map(map, [key | rest]) when is_map(map) do
+  def new(map, [key | rest]) when is_map(map) do
     if is_integer(key) do
-      [empty_map(rest)]
+      [new(rest)]
     else
-      Map.put(map, "#{key}", empty_map(rest))
+      Map.put(map, "#{key}", new(rest))
     end
   end
 
-  def empty_map(map_or_list, []), do: map_or_list
+  def new(map_or_list, []), do: map_or_list
 
   @doc """
   Acts as an IndifferentMap. Put a key/value regardless of the key type. If the map
@@ -307,43 +307,43 @@ defmodule WuunderUtils.Maps do
 
   ## Examples
 
-      iex> WuunderUtils.Maps.put_field(%{value: 20}, :weight, 350)
+      iex> WuunderUtils.Maps.put(%{value: 20}, :weight, 350)
       %{value: 20, weight: 350}
 
-      iex> WuunderUtils.Maps.put_field(["a", "b", "c"], 1, "d")
+      iex> WuunderUtils.Maps.put(["a", "b", "c"], 1, "d")
       ["a", "d", "c"]
 
-      iex> WuunderUtils.Maps.put_field(["a", "b", "c"], 4, "d")
+      iex> WuunderUtils.Maps.put(["a", "b", "c"], 4, "d")
       ["a", "b", "c"]
 
-      iex> WuunderUtils.Maps.put_field(%{value: 20, weight: 200}, "weight", 350)
+      iex> WuunderUtils.Maps.put(%{value: 20, weight: 200}, "weight", 350)
       %{value: 20, weight: 350}
 
-      iex> WuunderUtils.Maps.put_field(%{value: 20}, "weight", 350)
+      iex> WuunderUtils.Maps.put(%{value: 20}, "weight", 350)
       %{:value => 20, "weight" => 350}
 
-      iex> WuunderUtils.Maps.put_field(%{"weight" => 350}, :value, 25)
+      iex> WuunderUtils.Maps.put(%{"weight" => 350}, :value, 25)
       %{"weight" => 350, "value" => 25}
 
-      iex> WuunderUtils.Maps.put_field(%{"weight" => 350}, "value", 25)
+      iex> WuunderUtils.Maps.put(%{"weight" => 350}, "value", 25)
       %{"weight" => 350, "value" => 25}
 
   """
-  @spec put_field(map() | struct() | list() | nil, String.t() | atom(), any()) ::
+  @spec put(map() | struct() | list() | nil, String.t() | atom(), any()) ::
           map() | struct() | list()
-  def put_field(map, key, value)
+  def put(map, key, value)
       when is_map(map) and is_valid_map_atom_key(key) do
-    if Map.has_key?(map, key) || has_only_atom_keys?(map) do
+    if Map.has_key?(map, key) || only_atom_keys?(map) do
       Map.put(map, key, value)
     else
       Map.put(map, "#{key}", value)
     end
   end
 
-  def put_field(list, index, value) when is_list(list) and is_integer(index),
+  def put(list, index, value) when is_list(list) and is_integer(index),
     do: List.replace_at(list, index, value)
 
-  def put_field(map, key, value) when is_map(map) and is_valid_map_binary_key(key) do
+  def put(map, key, value) when is_map(map) and is_valid_map_binary_key(key) do
     atom_key = get_safe_key(key)
 
     if Map.has_key?(map, atom_key) do
@@ -376,122 +376,122 @@ defmodule WuunderUtils.Maps do
       ...>     ]
       ...>   }
       ...> }
-      iex> WuunderUtils.Maps.put_field_in(person, [:first_name], "Piet")
+      iex> WuunderUtils.Maps.deep_put(person, [:first_name], "Piet")
       %Person{person | first_name: "Piet"}
-      iex> WuunderUtils.Maps.put_field_in(person, [:country, :code], "US")
+      iex> WuunderUtils.Maps.deep_put(person, [:country, :code], "US")
       %Person{person | country: %Country{code: "US"}}
-      iex> WuunderUtils.Maps.put_field_in(person, [:meta, :skills, 1], "vaultdweller")
+      iex> WuunderUtils.Maps.deep_put(person, [:meta, :skills, 1], "vaultdweller")
       %Person{person | meta: %{skills: ["programmer", "vaultdweller", %{name: "painting", type: "hobby"}]}}
-      iex> WuunderUtils.Maps.put_field_in(person, [:meta, :skills, 2, :name], "walking")
+      iex> WuunderUtils.Maps.deep_put(person, [:meta, :skills, 2, :name], "walking")
       %Person{person | meta: %{skills: ["programmer", "manager", %{name: "walking", type: "hobby"}]}}
-      iex> WuunderUtils.Maps.put_field_in(person, "meta.skills.2.name", "walking")
+      iex> WuunderUtils.Maps.deep_put(person, "meta.skills.2.name", "walking")
       %Person{person | meta: %{skills: ["programmer", "manager", %{name: "walking", type: "hobby"}]}}
 
   """
-  @spec put_field_in(
+  @spec deep_put(
           map() | struct() | list() | nil,
           list(atom() | String.t()) | String.t(),
           any()
         ) :: any()
-  def put_field_in(value, path, value_to_set)
+  def deep_put(value, path, value_to_set)
       when (is_map(value) or is_list(value)) and is_binary(path) do
     keys = keys_from_path(path)
 
-    put_field_in(value, keys, value_to_set)
+    deep_put(value, keys, value_to_set)
   end
 
-  def put_field_in(map_or_list, [key | rest], value_to_set)
+  def deep_put(map_or_list, [key | rest], value_to_set)
       when is_map(map_or_list) or is_list(map_or_list) do
-    current = get_field(map_or_list, key)
-    put_field(map_or_list, key, put_field_in(current, rest, value_to_set))
+    current = get(map_or_list, key)
+    put(map_or_list, key, deep_put(current, rest, value_to_set))
   end
 
-  def put_field_in(_map_or_list, [], value_to_set), do: value_to_set
+  def deep_put(_map_or_list, [], value_to_set), do: value_to_set
 
   @doc """
   Removes a key from a map. Doesn't matter if the key is an atom or string
 
   ## Examples
 
-      iex> WuunderUtils.Maps.delete_field(%{length: 255, weight: 100}, :length)
+      iex> WuunderUtils.Maps.delete(%{length: 255, weight: 100}, :length)
       %{weight: 100}
 
-      iex> WuunderUtils.Maps.delete_field(%{length: 255, weight: 100}, "length")
+      iex> WuunderUtils.Maps.delete(%{length: 255, weight: 100}, "length")
       %{weight: 100}
 
-      iex> WuunderUtils.Maps.delete_field(%{"value" => 50, "currency" => "EUR"}, "currency")
+      iex> WuunderUtils.Maps.delete(%{"value" => 50, "currency" => "EUR"}, "currency")
       %{"value" => 50}
 
-      iex> WuunderUtils.Maps.delete_field(%{"value" => 50, "currency" => "EUR"}, :currency)
+      iex> WuunderUtils.Maps.delete(%{"value" => 50, "currency" => "EUR"}, :currency)
       %{"value" => 50}
 
-      iex> WuunderUtils.Maps.delete_field(["a", "b", "c"], 1)
+      iex> WuunderUtils.Maps.delete(["a", "b", "c"], 1)
       ["a", "c"]
 
-      iex> WuunderUtils.Maps.delete_field({"a", "b", "c"}, 1)
+      iex> WuunderUtils.Maps.delete({"a", "b", "c"}, 1)
       {"a", "c"}
 
       iex> country = %Country{code: "NL"}
       ...>
-      ...> WuunderUtils.Maps.delete_field(country, :code)
+      ...> WuunderUtils.Maps.delete(country, :code)
       %Country{code: ""}
 
       iex> country = %Country{code: "NL"}
       ...>
-      ...> WuunderUtils.Maps.delete_field(country, "code")
+      ...> WuunderUtils.Maps.delete(country, "code")
       %Country{code: ""}
 
       iex> country = %Country{code: "NL"}
       ...>
-      ...> WuunderUtils.Maps.delete_field(country, "does_not_exist")
+      ...> WuunderUtils.Maps.delete(country, "does_not_exist")
       %Country{code: "NL"}
 
   """
-  @spec delete_field(any(), map_key() | non_neg_integer()) :: any()
-  def delete_field(%module{} = struct, key)
+  @spec delete(any(), map_key() | non_neg_integer()) :: any()
+  def delete(%module{} = struct, key)
       when is_struct(struct) and is_valid_map_atom_key(key) do
     default = struct(module, %{})
 
     if Map.has_key?(default, key) do
-      put_field(struct, key, Map.get(default, key))
+      put(struct, key, Map.get(default, key))
     else
       struct
     end
   end
 
-  def delete_field(struct, key) when is_struct(struct) and is_valid_map_binary_key(key) do
+  def delete(struct, key) when is_struct(struct) and is_valid_map_binary_key(key) do
     atom_key = get_safe_key(key)
 
     if Map.has_key?(struct, atom_key) do
-      delete_field(struct, atom_key)
+      delete(struct, atom_key)
     else
       struct
     end
   end
 
-  def delete_field(map, key) when is_map(map) and is_valid_map_atom_key(key) do
-    if has_only_atom_keys?(map) do
+  def delete(map, key) when is_map(map) and is_valid_map_atom_key(key) do
+    if only_atom_keys?(map) do
       Map.delete(map, key)
     else
       Map.delete(map, "#{key}")
     end
   end
 
-  def delete_field(tuple, index)
+  def delete(tuple, index)
       when is_tuple(tuple) and is_number(index) and index < tuple_size(tuple),
       do: Tuple.delete_at(tuple, index)
 
-  def delete_field(tuple, index)
+  def delete(tuple, index)
       when is_tuple(tuple) and is_number(index) and index >= tuple_size(tuple),
       do: tuple
 
-  def delete_field(list, index) when is_list(list) and is_number(index) and index < length(list),
+  def delete(list, index) when is_list(list) and is_number(index) and index < length(list),
     do: List.delete_at(list, index)
 
-  def delete_field(list, index) when is_list(list) and is_number(index) and index >= length(list),
+  def delete(list, index) when is_list(list) and is_number(index) and index >= length(list),
     do: list
 
-  def delete_field(map, key) when is_map(map) and is_valid_map_binary_key(key) do
+  def delete(map, key) when is_map(map) and is_valid_map_binary_key(key) do
     atom_key = get_safe_key(key)
 
     if Map.has_key?(map, atom_key) do
@@ -506,7 +506,7 @@ defmodule WuunderUtils.Maps do
 
   ## Examples
 
-      iex> WuunderUtils.Maps.delete_field_in(%{"data" => [%{"name" => "Piet"}, %{"name" => "Henk"}]}, "data.0.name")
+      iex> WuunderUtils.Maps.deep_delete(%{"data" => [%{"name" => "Piet"}, %{"name" => "Henk"}]}, "data.0.name")
       %{"data" => [%{}, %{"name" => "Henk"}]}
 
       iex> person = %Person{
@@ -524,7 +524,7 @@ defmodule WuunderUtils.Maps do
       ...>   }
       ...> }
       ...>
-      ...> WuunderUtils.Maps.delete_field_in(person, [:country, :code])
+      ...> WuunderUtils.Maps.deep_delete(person, [:country, :code])
       %Person{
         country: %Country{code: ""},
         address: %Address{
@@ -539,7 +539,7 @@ defmodule WuunderUtils.Maps do
           ]
         }
       }
-      iex> WuunderUtils.Maps.delete_field_in(person, "meta.skills.1")
+      iex> WuunderUtils.Maps.deep_delete(person, "meta.skills.1")
       %Person{
         country: %Country{code: "NL"},
         address: %Address{
@@ -554,58 +554,58 @@ defmodule WuunderUtils.Maps do
         }
       }
   """
-  @spec delete_field_in(any(), list(atom()) | String.t()) :: any()
-  def delete_field_in(value, path) when is_binary(path) do
+  @spec deep_delete(any(), list(atom()) | String.t()) :: any()
+  def deep_delete(value, path) when is_binary(path) do
     keys = keys_from_path(path)
-    delete_field_in(value, keys)
+    deep_delete(value, keys)
   end
 
-  def delete_field_in(nil, _keys), do: nil
+  def deep_delete(nil, _keys), do: nil
 
-  def delete_field_in(value, []), do: value
+  def deep_delete(value, []), do: value
 
-  def delete_field_in(value, _keys)
+  def deep_delete(value, _keys)
       when not is_map(value) and not is_list(value) and not is_tuple(value),
       do: nil
 
-  def delete_field_in(map_list_or_tuple, [key])
+  def deep_delete(map_list_or_tuple, [key])
       when is_map(map_list_or_tuple) or is_list(map_list_or_tuple) or is_tuple(map_list_or_tuple),
-      do: delete_field(map_list_or_tuple, key)
+      do: delete(map_list_or_tuple, key)
 
-  def delete_field_in(map_list_or_tuple, [_head | _tail] = keys)
+  def deep_delete(map_list_or_tuple, [_head | _tail] = keys)
       when is_map(map_list_or_tuple) or is_list(map_list_or_tuple) or is_tuple(map_list_or_tuple) do
     before_last_key = Enum.slice(keys, 0..-2//1)
     last_key = List.last(keys)
 
     new_value =
       map_list_or_tuple
-      |> get_field_in(before_last_key)
-      |> delete_field(last_key)
+      |> deep_get(before_last_key)
+      |> delete(last_key)
 
-    put_field_in(map_list_or_tuple, before_last_key, new_value)
+    deep_put(map_list_or_tuple, before_last_key, new_value)
   end
 
-  def delete_field_in(nil, keys) when is_list(keys), do: nil
+  def deep_delete(nil, keys) when is_list(keys), do: nil
 
   @doc """
   Tests if the given map only consists of atom keys
 
   ## Examples
 
-      iex> WuunderUtils.Maps.has_only_atom_keys?(%{a: 1, b: 2})
+      iex> WuunderUtils.Maps.only_atom_keys?(%{a: 1, b: 2})
       true
 
-      iex> WuunderUtils.Maps.has_only_atom_keys?(%{:a => 1, "b" => 2})
+      iex> WuunderUtils.Maps.only_atom_keys?(%{:a => 1, "b" => 2})
       false
 
-      iex> WuunderUtils.Maps.has_only_atom_keys?(%{"a" => 1, "b" => 2})
+      iex> WuunderUtils.Maps.only_atom_keys?(%{"a" => 1, "b" => 2})
       false
 
   """
-  @spec has_only_atom_keys?(map() | struct()) :: boolean()
-  def has_only_atom_keys?(struct) when is_struct(struct), do: true
+  @spec only_atom_keys?(map() | struct()) :: boolean()
+  def only_atom_keys?(struct) when is_struct(struct), do: true
 
-  def has_only_atom_keys?(map) when is_map(map) do
+  def only_atom_keys?(map) when is_map(map) do
     map
     |> Map.keys()
     |> Enum.all?(&is_atom/1)
@@ -616,21 +616,21 @@ defmodule WuunderUtils.Maps do
 
   ## Examples
 
-      iex> WuunderUtils.Maps.alias_field(%{country: "NL"}, :country, :country_code)
+      iex> WuunderUtils.Maps.rename_key(%{country: "NL"}, :country, :country_code)
       %{country_code: "NL"}
 
-      iex> WuunderUtils.Maps.alias_field(%{"country" => "NL"}, :country, :country_code)
+      iex> WuunderUtils.Maps.rename_key(%{"country" => "NL"}, :country, :country_code)
       %{"country_code" => "NL"}
 
-      iex> WuunderUtils.Maps.alias_field(%{street_name: "Straatnaam"}, :street, :street_address)
+      iex> WuunderUtils.Maps.rename_key(%{street_name: "Straatnaam"}, :street, :street_address)
       %{street_name: "Straatnaam"}
 
   """
-  @spec alias_field(map(), atom(), atom()) :: map()
-  def alias_field(map, from, to)
+  @spec rename_key(map(), atom(), atom()) :: map()
+  def rename_key(map, from, to)
       when is_map(map) and is_valid_map_atom_key(from) and is_valid_map_atom_key(to) do
-    from_key = if Enum.empty?(map) || has_only_atom_keys?(map), do: from, else: "#{from}"
-    to_key = if Enum.empty?(map) || has_only_atom_keys?(map), do: to, else: "#{to}"
+    from_key = if Enum.empty?(map) || only_atom_keys?(map), do: from, else: "#{from}"
+    to_key = if Enum.empty?(map) || only_atom_keys?(map), do: to, else: "#{to}"
 
     if is_nil(Map.get(map, from_key)) == false && is_nil(Map.get(map, to_key)) do
       map
@@ -646,15 +646,15 @@ defmodule WuunderUtils.Maps do
 
   ## Examples
 
-      iex> WuunderUtils.Maps.alias_fields(%{country: "NL", street: "Straat", number: 666}, %{country: :country_code, street: :street_name, number: :house_number})
+      iex> WuunderUtils.Maps.rename_keys(%{country: "NL", street: "Straat", number: 666}, %{country: :country_code, street: :street_name, number: :house_number})
       %{country_code: "NL", house_number: 666, street_name: "Straat"}
 
   """
-  @spec alias_fields(map(), map()) :: map()
-  def alias_fields(map, aliasses),
+  @spec rename_keys(map(), map()) :: map()
+  def rename_keys(map, aliasses),
     do:
       Enum.reduce(Map.keys(aliasses), map, fn key, alias_params ->
-        alias_field(alias_params, key, Map.get(aliasses, key))
+        rename_key(alias_params, key, Map.get(aliasses, key))
       end)
 
   @doc """
@@ -788,7 +788,7 @@ defmodule WuunderUtils.Maps do
       do: put_when(map, !!condition.(), key, value)
 
   def put_when(map, true, key, value) when is_map(map) and is_valid_map_key(key),
-    do: put_field(map, key, value)
+    do: put(map, key, value)
 
   def put_when(map, false, key, _value) when is_map(map) and is_valid_map_key(key),
     do: map
@@ -1080,9 +1080,9 @@ defmodule WuunderUtils.Maps do
         new_value = delete_empty(value)
 
         if is_nil(new_value) do
-          delete_field(new_map, key)
+          delete(new_map, key)
         else
-          put_field(new_map, key, new_value)
+          put(new_map, key, new_value)
         end
       end)
 
@@ -1127,32 +1127,155 @@ defmodule WuunderUtils.Maps do
 
   ## Examples
 
-        iex> WuunderUtils.Maps.map_all(%{name: " test ", data: ["some item", "other item   ", %{x: "  value"}]}, &WuunderUtils.Presence.trim/1)
+        iex> WuunderUtils.Maps.map(%{name: " test ", data: ["some item", "other item   ", %{x: "  value"}]}, &WuunderUtils.Presence.trim/1)
         %{data: ["some item", "other item", %{x: "value"}], name: "test"}
   """
-  @spec map_all(any(), function()) :: any()
-  def map_all(value, map_fn) when is_map(value) and is_function(map_fn) do
+  @spec map(any(), function()) :: any()
+  def map(value, map_fn) when is_map(value) and is_function(map_fn) do
     value
     |> Map.keys()
     |> Enum.reduce(value, fn key, new_map ->
       value = Map.get(new_map, key)
-      new_value = map_all(value, map_fn)
+      new_value = map(value, map_fn)
 
-      put_field(new_map, key, new_value)
+      put(new_map, key, new_value)
     end)
   end
 
-  def map_all(values, map_fn) when is_list(values) and is_function(map_fn),
-    do: Enum.map(values, &map_all(&1, map_fn))
+  def map(values, map_fn) when is_list(values) and is_function(map_fn),
+    do: Enum.map(values, &map(&1, map_fn))
 
-  def map_all(values, map_fn) when is_tuple(values) and is_function(map_fn) do
+  def map(values, map_fn) when is_tuple(values) and is_function(map_fn) do
     values
     |> Tuple.to_list()
-    |> map_all(map_fn)
+    |> map(map_fn)
     |> List.to_tuple()
   end
 
-  def map_all(value, map_fn), do: map_fn.(value)
+  def map(value, map_fn), do: map_fn.(value)
+
+  @doc """
+  Converts keys in maps to strings. Note: skips structs. So you need to convert these to maps first.
+
+  ## Examples
+
+      iex> WuunderUtils.Maps.stringify_keys(%{
+      ...>   first_name: "Peter",
+      ...>   last_name: "Griffin",
+      ...>   skills: [%{code: "A", title: "Talking"}, %{code: "B", title: "Moving"}]
+      ...> })
+      %{
+        "first_name" => "Peter",
+        "last_name" => "Griffin",
+        "skills" => [%{"code" => "A", "title" => "Talking"}, %{"code" => "B", "title" => "Moving"}]
+      }
+
+      iex> WuunderUtils.Maps.stringify_keys(%Person{
+      ...>   first_name: "Peter",
+      ...>   last_name: "Pan",
+      ...>   date_of_birth: ~D[1980-01-02],
+      ...>   weight: Decimal.new("81.5"),
+      ...>   country: %Country{code: "UK"},
+      ...>   time_of_death: ~T[13:37:37],
+      ...>   meta: %{skills: [%{code: "A", title: "Talking"}, %{code: "B", title: "Moving"}]}
+      ...> })
+      %Person{
+        first_name: "Peter",
+        last_name: "Pan",
+        date_of_birth: ~D[1980-01-02],
+        weight: Decimal.new("81.5"),
+        country: %Country{code: "UK"},
+        time_of_death: ~T[13:37:37],
+        meta: %{"skills" => [%{"code" => "A", "title" => "Talking"}, %{"code" => "B", "title" => "Moving"}]}
+      }
+  """
+  @spec stringify_keys(any()) :: any()
+  def stringify_keys(struct) when is_struct(struct) do
+    struct
+    |> Map.keys()
+    |> Enum.reduce(struct, fn key, new_struct ->
+      value = Map.get(struct, key)
+      Map.put(new_struct, key, stringify_keys(value))
+    end)
+  end
+
+  def stringify_keys(map) when is_map(map) do
+    map
+    |> Enum.reduce(%{}, fn {key, value}, new_map ->
+      Map.put(new_map, "#{key}", stringify_keys(value))
+    end)
+  end
+
+  def stringify_keys(list) when is_list(list), do: Enum.map(list, &stringify_keys/1)
+
+  def stringify_keys(value), do: value
+
+  @doc """
+  Converts keys in maps to atoms. By default, this function will only atomize strings that already exist.
+  Note: skips structs.
+
+  ## Examples
+
+      iex> WuunderUtils.Maps.atomize_keys(%{
+      ...>   "first_name" => "Peter",
+      ...>   "last_name" => "Griffin",
+      ...>   "skills" => [%{"code" => "A", "title" => "Talking"}, %{"code" => "B", "title" => "Moving"}]
+      ...> })
+      %{
+        first_name: "Peter",
+        last_name: "Griffin",
+        skills: [%{code: "A", title: "Talking"}, %{code: "B", title: "Moving"}]
+      }
+
+      iex> WuunderUtils.Maps.atomize_keys(%Person{
+      ...>   first_name: "Peter",
+      ...>   last_name: "Pan",
+      ...>   date_of_birth: ~D[1980-01-02],
+      ...>   weight: Decimal.new("81.5"),
+      ...>   country: %Country{code: "UK"},
+      ...>   time_of_death: ~T[13:37:37],
+      ...>   meta: %{"skills" => [%{"code" => "A", "title" => "Talking"}, %{"code" => "B", "title" => "Moving"}]}
+      ...> })
+      %Person{
+        first_name: "Peter",
+        last_name: "Pan",
+        date_of_birth: ~D[1980-01-02],
+        weight: Decimal.new("81.5"),
+        country: %Country{code: "UK"},
+        time_of_death: ~T[13:37:37],
+        meta: %{skills: [%{code: "A", title: "Talking"}, %{code: "B", title: "Moving"}]}
+      }
+  """
+  @spec atomize_keys(any(), Keyword.t()) :: any()
+  def atomize_keys(value, options \\ [existing_atoms: true])
+
+  def atomize_keys(struct, options) when is_struct(struct) and is_list(options) do
+    struct
+    |> Map.keys()
+    |> Enum.reduce(struct, fn key, new_struct ->
+      value = Map.get(struct, key)
+      Map.put(new_struct, key, atomize_keys(value, options))
+    end)
+  end
+
+  def atomize_keys(map, options) when is_map(map) and is_list(options) do
+    map
+    |> Enum.reduce(%{}, fn {key, value}, new_map ->
+      new_key =
+        cond do
+          is_binary(key) and options[:existing_atoms] -> get_safe_key(key)
+          is_binary(key) -> String.to_atom(key)
+          is_atom(key) -> key
+        end
+
+      Map.put(new_map, new_key, atomize_keys(value, options))
+    end)
+  end
+
+  def atomize_keys(list, options) when is_list(list) and is_list(options),
+    do: Enum.map(list, &atomize_keys(&1, options))
+
+  def atomize_keys(value, _options), do: value
 
   defp transform_struct(module, struct, transform) do
     if has_ecto_schema?(module) do

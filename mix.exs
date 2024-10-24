@@ -16,7 +16,7 @@ defmodule WuunderUtils.MixProject do
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [coveralls: :test, "coveralls.html": :test],
-      version: "0.8.1"
+      version: "0.9.0"
     ]
   end
 
@@ -41,9 +41,10 @@ defmodule WuunderUtils.MixProject do
   defp package do
     [
       name: "wuunder_utils",
-      files: ~w(lib .formatter.exs mix.exs README*),
-      licenses: ["Apache-2.0"],
+      files: ~w(lib .formatter.exs mix.exs CHANGELOG.md LICENSE.md README*),
+      licenses: ["MIT"],
       links: %{
+        "Changelog" => "https://hexdocs.pm/wuunder_utils/changelog.html",
         "GitHub" => "https://github.com/wuunder/wuunder_utils",
         "Docs" => "https://hexdocs.pm/wuunder_utils"
       }
@@ -53,7 +54,7 @@ defmodule WuunderUtils.MixProject do
   defp docs do
     [
       main: "WuunderUtils",
-      extras: ["README.md"]
+      extras: ["README.md", "CHANGELOG.md"]
     ]
   end
 

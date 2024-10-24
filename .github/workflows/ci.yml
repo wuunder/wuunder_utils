@@ -1,9 +1,17 @@
 name: Test and build
 
 on:
+  push:
+    branches: ["main"]
   pull_request:
-    branches:
-      - master
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -35,8 +43,8 @@ jobs:
           restore-keys: ${{ runner.os }}-mixv2-
 
       - name: Setup deps
-        run: | 
-          mix deps.get 
+        run: |
+          mix deps.get
           mix deps.unlock --check-unused
 
       - name: Compile
@@ -46,13 +54,10 @@ jobs:
         run: mix format --check-formatted
 
       - name: Run Tests
-        run: mix coveralls.github --warnings-as-errors
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mix test
 
       - name: Cleanup
         run: mix clean
-
 
   dialyzer:
     name: "Run Dialyzer"
@@ -110,8 +115,8 @@ jobs:
             priv/plts
 
       - name: Setup deps
-        run: | 
-          mix deps.get 
+        run: |
+          mix deps.get
           mix deps.unlock --check-unused
 
       - name: Compile
