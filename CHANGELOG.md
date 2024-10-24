@@ -17,5 +17,5 @@
 
 ### Enhancements
 
-  * Added `strinigy_keys` helper in `WuunderUtils.Maps`
+  * Added `stringify_keys` helper in `WuunderUtils.Maps`
   * Added `atomize_keys` helper in `WuunderUtils.Maps`
