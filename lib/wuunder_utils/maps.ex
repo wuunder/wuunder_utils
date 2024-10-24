@@ -1210,6 +1210,73 @@ defmodule WuunderUtils.Maps do
 
   def stringify_keys(value), do: value
 
+  @doc """
+  Converts keys in maps to atoms. By default, this function will only atomize strings that already exist.
+  Note: skips structs.
+
+  ## Examples
+
+      iex> WuunderUtils.Maps.atomize_keys(%{
+      ...>   "first_name" => "Peter",
+      ...>   "last_name" => "Griffin",
+      ...>   "skills" => [%{"code" => "A", "title" => "Talking"}, %{"code" => "B", "title" => "Moving"}]
+      ...> })
+      %{
+        first_name: "Peter",
+        last_name: "Griffin",
+        skills: [%{code: "A", title: "Talking"}, %{code: "B", title: "Moving"}]
+      }
+
+      iex> WuunderUtils.Maps.atomize_keys(%Person{
+      ...>   first_name: "Peter",
+      ...>   last_name: "Pan",
+      ...>   date_of_birth: ~D[1980-01-02],
+      ...>   weight: Decimal.new("81.5"),
+      ...>   country: %Country{code: "UK"},
+      ...>   time_of_death: ~T[13:37:37],
+      ...>   meta: %{"skills" => [%{"code" => "A", "title" => "Talking"}, %{"code" => "B", "title" => "Moving"}]}
+      ...> })
+      %Person{
+        first_name: "Peter",
+        last_name: "Pan",
+        date_of_birth: ~D[1980-01-02],
+        weight: Decimal.new("81.5"),
+        country: %Country{code: "UK"},
+        time_of_death: ~T[13:37:37],
+        meta: %{skills: [%{code: "A", title: "Talking"}, %{code: "B", title: "Moving"}]}
+      }
+  """
+  @spec atomize_keys(any(), Keyword.t()) :: any()
+  def atomize_keys(value, options \\ [existing_atoms: true])
+
+  def atomize_keys(struct, options) when is_struct(struct) and is_list(options) do
+    struct
+    |> Map.keys()
+    |> Enum.reduce(struct, fn key, new_struct ->
+      value = Map.get(struct, key)
+      Map.put(new_struct, key, atomize_keys(value, options))
+    end)
+  end
+
+  def atomize_keys(map, options) when is_map(map) and is_list(options) do
+    map
+    |> Enum.reduce(%{}, fn {key, value}, new_map ->
+      new_key =
+        cond do
+          is_binary(key) and options[:existing_atoms] -> get_safe_key(key)
+          is_binary(key) -> String.to_atom(key)
+          is_atom(key) -> key
+        end
+
+      Map.put(new_map, new_key, atomize_keys(value, options))
+    end)
+  end
+
+  def atomize_keys(list, options) when is_list(list) and is_list(options),
+    do: Enum.map(list, &atomize_keys(&1, options))
+
+  def atomize_keys(value, _options), do: value
+
   defp transform_struct(module, struct, transform) do
     if has_ecto_schema?(module) do
       module
