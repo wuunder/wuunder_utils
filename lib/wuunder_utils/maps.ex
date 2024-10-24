@@ -1127,32 +1127,88 @@ defmodule WuunderUtils.Maps do
 
   ## Examples
 
-        iex> WuunderUtils.Maps.map_all(%{name: " test ", data: ["some item", "other item   ", %{x: "  value"}]}, &WuunderUtils.Presence.trim/1)
+        iex> WuunderUtils.Maps.map(%{name: " test ", data: ["some item", "other item   ", %{x: "  value"}]}, &WuunderUtils.Presence.trim/1)
         %{data: ["some item", "other item", %{x: "value"}], name: "test"}
   """
-  @spec map_all(any(), function()) :: any()
-  def map_all(value, map_fn) when is_map(value) and is_function(map_fn) do
+  @spec map(any(), function()) :: any()
+  def map(value, map_fn) when is_map(value) and is_function(map_fn) do
     value
     |> Map.keys()
     |> Enum.reduce(value, fn key, new_map ->
       value = Map.get(new_map, key)
-      new_value = map_all(value, map_fn)
+      new_value = map(value, map_fn)
 
       put(new_map, key, new_value)
     end)
   end
 
-  def map_all(values, map_fn) when is_list(values) and is_function(map_fn),
-    do: Enum.map(values, &map_all(&1, map_fn))
+  def map(values, map_fn) when is_list(values) and is_function(map_fn),
+    do: Enum.map(values, &map(&1, map_fn))
 
-  def map_all(values, map_fn) when is_tuple(values) and is_function(map_fn) do
+  def map(values, map_fn) when is_tuple(values) and is_function(map_fn) do
     values
     |> Tuple.to_list()
-    |> map_all(map_fn)
+    |> map(map_fn)
     |> List.to_tuple()
   end
 
-  def map_all(value, map_fn), do: map_fn.(value)
+  def map(value, map_fn), do: map_fn.(value)
+
+  @doc """
+  Converts keys in maps to strings. Note: skips structs. So you need to convert these to maps first.
+
+  ## Examples
+
+      iex> WuunderUtils.Maps.stringify_keys(%{
+      ...>   first_name: "Peter",
+      ...>   last_name: "Griffin",
+      ...>   skills: [%{code: "A", title: "Talking"}, %{code: "B", title: "Moving"}]
+      ...> })
+      %{
+        "first_name" => "Peter",
+        "last_name" => "Griffin",
+        "skills" => [%{"code" => "A", "title" => "Talking"}, %{"code" => "B", "title" => "Moving"}]
+      }
+
+      iex> WuunderUtils.Maps.stringify_keys(%Person{
+      ...>   first_name: "Peter",
+      ...>   last_name: "Pan",
+      ...>   date_of_birth: ~D[1980-01-02],
+      ...>   weight: Decimal.new("81.5"),
+      ...>   country: %Country{code: "UK"},
+      ...>   time_of_death: ~T[13:37:37],
+      ...>   meta: %{skills: [%{code: "A", title: "Talking"}, %{code: "B", title: "Moving"}]}
+      ...> })
+      %Person{
+        first_name: "Peter",
+        last_name: "Pan",
+        date_of_birth: ~D[1980-01-02],
+        weight: Decimal.new("81.5"),
+        country: %Country{code: "UK"},
+        time_of_death: ~T[13:37:37],
+        meta: %{"skills" => [%{"code" => "A", "title" => "Talking"}, %{"code" => "B", "title" => "Moving"}]}
+      }
+  """
+  @spec stringify_keys(any()) :: any()
+  def stringify_keys(struct) when is_struct(struct) do
+    struct
+    |> Map.keys()
+    |> Enum.reduce(struct, fn key, new_struct ->
+      value = Map.get(struct, key)
+      Map.put(new_struct, key, stringify_keys(value))
+    end)
+  end
+
+  def stringify_keys(map) when is_non_struct_map(map) do
+    map
+    |> Enum.reduce(%{}, fn {key, value}, new_map ->
+      Map.put(new_map, "#{key}", stringify_keys(value))
+    end)
+  end
+
+  def stringify_keys(list) when is_list(list), do: Enum.map(list, &stringify_keys/1)
+
+  def stringify_keys(value), do: value
 
   defp transform_struct(module, struct, transform) do
     if has_ecto_schema?(module) do
