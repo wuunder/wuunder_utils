@@ -1199,7 +1199,7 @@ defmodule WuunderUtils.Maps do
     end)
   end
 
-  def stringify_keys(map) when is_non_struct_map(map) do
+  def stringify_keys(map) when is_map(map) do
     map
     |> Enum.reduce(%{}, fn {key, value}, new_map ->
       Map.put(new_map, "#{key}", stringify_keys(value))
