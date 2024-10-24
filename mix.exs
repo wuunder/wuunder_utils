@@ -41,9 +41,10 @@ defmodule WuunderUtils.MixProject do
   defp package do
     [
       name: "wuunder_utils",
-      files: ~w(lib .formatter.exs mix.exs README*),
+      files: ~w(lib .formatter.exs mix.exs CHANGELOG.md LICENSE.md README*),
       licenses: ["MIT"],
       links: %{
+        "Changelog" => "https://hexdocs.pm/wuunder_utils/changelog.html",
         "GitHub" => "https://github.com/wuunder/wuunder_utils",
         "Docs" => "https://hexdocs.pm/wuunder_utils"
       }
@@ -53,7 +54,7 @@ defmodule WuunderUtils.MixProject do
   defp docs do
     [
       main: "WuunderUtils",
-      extras: ["README.md"]
+      extras: ["README.md", "CHANGELOG.md"]
     ]
   end
 
