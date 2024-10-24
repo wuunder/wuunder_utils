@@ -2,7 +2,6 @@
 
 ## v0.9 (2024-10-24)
 
-
 ### Backwards incompatible changes
 
   * Renamed `WuunderUtils.Maps.delete_field` to `WuunderUtils.Maps.delete`
