@@ -2,6 +2,7 @@ name: Test and build
 
 on:
   pull_request:
+  push:
     branches:
       - master
 
@@ -35,8 +36,8 @@ jobs:
           restore-keys: ${{ runner.os }}-mixv2-
 
       - name: Setup deps
-        run: | 
-          mix deps.get 
+        run: |
+          mix deps.get
           mix deps.unlock --check-unused
 
       - name: Compile
@@ -52,7 +53,6 @@ jobs:
 
       - name: Cleanup
         run: mix clean
-
 
   dialyzer:
     name: "Run Dialyzer"
@@ -110,8 +110,8 @@ jobs:
             priv/plts
 
       - name: Setup deps
-        run: | 
-          mix deps.get 
+        run: |
+          mix deps.get
           mix deps.unlock --check-unused
 
       - name: Compile
