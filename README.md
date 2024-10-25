@@ -3,6 +3,7 @@
 Contains a set of modules that makes Elixir development more fun and productive.
 
 ![Build status](https://github.com/wuunder/wuunder_utils/actions/workflows/ci.yml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/wuunder/wuunder_utils/badge.svg?branch=main)](https://coveralls.io/github/wuunder/wuunder_utils?branch=main)
 [![Hex.pm](https://img.shields.io/hexpm/v/wuunder_utils.svg)](https://hex.pm/packages/wuunder_utils)
 
 ## Installation

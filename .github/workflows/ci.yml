@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MIX_ENV: test
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - uses: actions/checkout@v3.1.0
@@ -54,7 +55,7 @@ jobs:
         run: mix format --check-formatted
 
       - name: Run Tests
-        run: mix test
+        run: mix coveralls.github --warnings-as-errors
 
       - name: Cleanup
         run: mix clean
