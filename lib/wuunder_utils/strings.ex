@@ -179,4 +179,29 @@ defmodule WuunderUtils.Strings do
       truncate(suffix, max_length, "")
     end
   end
+
+  @doc """
+  Compares two strings, ignoring the casing:
+
+  ## Examples
+
+    iex> WuunderUtils.Strings.compare?("case_x", "CASE_X")
+    true
+
+    iex> WuunderUtils.Strings.compare?("CASE_X", "CASE_X")
+    true
+
+    iex> WuunderUtils.Strings.compare?("CASE_X", "CaSe_X")
+    true
+
+    iex> WuunderUtils.Strings.compare?("CASE_Y", "CASE_X")
+    false
+
+    iex> WuunderUtils.Strings.compare?("CASE_y", "CASE_x")
+    false
+
+  """
+  @spec compare?(String.t(), String.t()) :: boolean()
+  def compare?(left, right) when is_binary(left) and is_binary(right),
+    do: String.downcase(left) == String.downcase(right)
 end
