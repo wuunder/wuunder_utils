@@ -16,7 +16,7 @@ defmodule WuunderUtils.MixProject do
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [coveralls: :test, "coveralls.html": :test],
-      version: "0.10.0"
+      version: "0.10.1"
     ]
   end
 
