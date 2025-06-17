@@ -121,7 +121,7 @@ defmodule WuunderUtils.Numbers do
     |> Kernel.==(0)
   end
 
-  def has_decimal_zero?(_), do: false
+  def decimal_zero?(_), do: false
 
   @doc """
   Tries to convert any value to a Decimal.
