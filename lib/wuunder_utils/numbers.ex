@@ -81,6 +81,49 @@ defmodule WuunderUtils.Numbers do
   def parse_float(_other_value), do: nil
 
   @doc """
+  Checks if given String.t() or float() ends with a zero decimal.
+
+  A String.t() is parsed and returns `false` if the parsing failed.
+
+  ## Examples
+
+      iex> WuunderUtils.Numbers.decimal_zero?(4.5)
+      false
+
+      iex> WuunderUtils.Numbers.decimal_zero?(1.0003)
+      false
+
+      iex> WuunderUtils.Numbers.decimal_zero?("4.0000")
+      true
+
+      iex> WuunderUtils.Numbers.decimal_zero?(6)
+      true
+
+      iex> WuunderUtils.Numbers.decimal_zero?("5.0")
+      true
+
+      iex> WuunderUtils.Numbers.decimal_zero?(nil)
+      false
+  """
+  @spec decimal_zero?(term) :: boolean
+  def decimal_zero?(value) when is_integer(value), do: true
+
+  def decimal_zero?(value) when is_binary(value) do
+    value
+    |> parse_float()
+    |> decimal_zero?()
+  end
+
+  def decimal_zero?(value) when is_float(value) do
+    value
+    |> Kernel.trunc()
+    |> Kernel.-(value)
+    |> Kernel.==(0)
+  end
+
+  def decimal_zero?(_), do: false
+
+  @doc """
   Tries to convert any value to a Decimal.
   It will also convert a `nil` to a 0.
 

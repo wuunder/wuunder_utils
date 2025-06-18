@@ -14,7 +14,7 @@ by adding `wuunder_utils` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:wuunder_utils, "~> 0.9.0"}
+    {:wuunder_utils, "~> 0.10.2"}
   ]
 end
 ```
