@@ -149,8 +149,8 @@ defmodule WuunderUtils.Numbers do
 
   ## Examples
 
-      iex> WuunderUtils.Numbers.as_string(13.37)
-      "13.37"
+      iex> WuunderUtils.Numbers.as_string(3200.00)
+      "3200.0"
 
       iex> WuunderUtils.Numbers.as_string(Decimal.new("13.37"))
       "13.37"
@@ -169,7 +169,10 @@ defmodule WuunderUtils.Numbers do
   def as_string(nil), do: nil
 
   def as_string(value) when is_decimal(value), do: Decimal.to_string(value)
-  def as_string(value) when is_float(value), do: Float.to_string(value)
+
+  def as_string(value) when is_float(value),
+    do: :erlang.float_to_binary(value, [{:decimals, 4}, :compact])
+
   def as_string(value) when is_integer(value), do: Integer.to_string(value)
 
   def as_string(value) when is_binary(value) do
